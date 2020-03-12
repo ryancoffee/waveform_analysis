@@ -2,8 +2,19 @@
 
 import numpy as np
 import lecroyparser 
-import h5py
 import sys
+import h5py
+
+def getHeaderBytes_h5(fname):
+    f=h5py.File(fname,'r')
+    nvals = len(f['Waveforms']['Channel 2']['Channel 2Data'][()])
+    f.close()
+    f = open(fname,'br')
+    buf = f.read()
+    f.close()
+    # careful, buf is now a list of 16 bit integers, so each val takes 2 bytes.
+    nseek = int(len(buf) - 2*nvals)
+    return (nseek,nvals)
 
 def getHeaderBytes(fname):
     data = lecroyparser.ScopeData(fname)
@@ -13,6 +24,11 @@ def getHeaderBytes(fname):
     f.close()
     nseek = int(len(buf) - nvals)
     return (nseek,nvals)
+
+def loadArrayBytes_h5(fname,nseek):
+    data =[]
+    # careful, buf is now a list of 16 bit integers, so each val takes 2 bytes.
+    return np.array(data,dtype=np.int16)
 
 def loadArrayBytes(fname,nseek):
     f = open(fname,'br')
