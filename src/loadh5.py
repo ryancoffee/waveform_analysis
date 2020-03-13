@@ -5,6 +5,8 @@ import lecroyparser
 import sys
 import h5py
 
+# for .wfm files from the Agilent, look into the following (https://pythonhosted.org/bitstring/introduction.html)
+
 def getHeaderBytes_h5(fname):
     f=h5py.File(fname,'r')
     nvals = len(f['Waveforms']['Channel 2']['Channel 2Data'][()])
