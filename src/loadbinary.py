@@ -92,7 +92,7 @@ def main():
     W = getWeinerFilter(data,FREQ,cut = 3.0,noise = 0.1)
     W_lowpass = getWeinerFilter(data,FREQ,cut = 1.0,noise = 0.0001)
     AC = getacFilter(data,FREQ,cut = 0.05)
-    thresh = 6
+    thresh = 1000 
     negation = 1 # set to 0 for positive going signals, 1 or -1 for negative going
     if (len(sys.argv)>4):
         thresh = int(sys.argv[4])
@@ -113,7 +113,7 @@ def main():
         #IDATA = np.fft.fft(sigmoid(y,2500,1000))*np.arange(y.shape[0])*W_lowpass
         #num = np.fft.ifft(IDATA).real
         #denom = np.fft.ifft(DATA).real
-        tofs = tofs + zeroCrossings((y * dy)/float(y.shape[0]),1000)
+        tofs = tofs + zeroCrossings((y * dy)/float(y.shape[0]),thresh)
         if wv%1000 == 0:
             np.savetxt(oname,np.column_stack((data,y,dy)),fmt= '%f')
             hout += np.histogram(tofs,bins)[0]
