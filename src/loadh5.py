@@ -29,7 +29,7 @@ def getacFilter(fname,cut = 0.075):
     return AC,FREQ
 
 def applyWeinerFilter_acFilter(fname,W,AC):
-    print(fname)
+    #print(fname)
     f=h5py.File(fname,'r')
     y = np.array(f['Waveforms']['Channel 2']['Channel 2Data'][()], dtype = float)
     Y = np.fft.fft(y)
@@ -75,8 +75,9 @@ def maxpool_int16(y,width=10):
     return np.array([np.int16(np.max(y[i:i+width])) for i in range(0,y.shape[0]-width-1,width)])
 
 def main():
-    if len(sys.argv[1])==1:
+    if len(sys.argv)<2:
         print('syntax is: ./src/loadh5.py <path+filehead> <nwaves> <cutoff>')
+        return
     path = 'data_fs'
     if (len(sys.argv)>1):
         path = sys.argv[1]
@@ -97,6 +98,7 @@ def main():
     hbins=np.arange(-2**9,2**9+1)
     hout = np.zeros(hbins.shape[0]-1,dtype = np.uint32)
     shots = np.uint64(0)
+    headstring = 'shots = %i'%(shots)
 
     for wv in range(nwaves):
         fname = '%s%05i.h5'%(path,wv)
@@ -106,19 +108,22 @@ def main():
         filtdata = applyWeinerFilter_acFilter(fname,WFILTER,ACFILTER)[-1]
         shots += 1
         hout += np.histogram(maxpool_int16(filtdata,50),hbins)[0].astype(np.uint32)
-        if wv%100==0:
+        if shots%100==0:
             hout10 = np.histogram(maxpool_int16(filtdata,10),hbins)[0]
             hout25 = np.histogram(maxpool_int16(filtdata,25),hbins)[0]
             hout50 = np.histogram(maxpool_int16(filtdata,50),hbins)[0]
             hout100 = np.histogram(maxpool_int16(filtdata,100),hbins)[0]
-            np.savetxt(oname,np.column_stack((hout10,hout25,hout50,hout100)),fmt = '%i')
+            headstring = 'shots = %i'%(shots)
+            np.savetxt(oname,np.column_stack((hout10,hout25,hout50,hout100)),fmt = '%i',header = headstring)
             oname = '%s.out'%(fname)
             np.savetxt(oname,np.column_stack( applyWeinerFilter_acFilter(fname,WFILTER,ACFILTER) ),fmt = '%f')
-        if wv%10==0:
+        if shots%10==0:
             name = '%stotal.hist'%(path)
             np.savetxt(name,hout,fmt = '%i')
+            print('temp write after %i shots:%s'%(shots,name))
     name = '%stotal.hist'%(path)
-    np.savetxt(fname,hout,fmt = '%i')
+    headstring = 'shots = %i'%(shots)
+    np.savetxt(name,hout,fmt = '%i',header = headstring)
     return
 
 if __name__ == "__main__":

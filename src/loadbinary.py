@@ -16,26 +16,26 @@ def zeroCrossings(data,thresh):
     while i < data.shape[0]-1:
         while data[i] < thresh:
             i += 1
-            if i == sz: break
-        if i == sz: break
+            if i == sz-1: break
+        if i == sz-1: break
         while data[i] > 0:
             i += 1
-            if i == sz: break
+            if i == sz-1: break
         tofs = tofs + [1./float(data[i]-data[i-1])*data[i] + float(i)]
-        if i == sz: break
+        if i == sz-1: break
         while data[i] < 0:
             i += 1
-            if i == sz: break
+            if i == sz-1: break
     return tofs 
 
-def getHeaderBytes(fname):
+def getHeaderBytesTimes(fname):
     data = lecroyparser.ScopeData(fname)
     nvals = len(data.y)
     f = open(fname,'br')
     buf = f.read()
     f.close()
     nseek = int(len(buf) - 2*nvals)
-    return (nseek,nvals)
+    return (nseek,nvals,data.x)
 
 def loadArrayBytes_int8(fname,nseek,nvals):
     f = open(fname,'br')
@@ -75,16 +75,13 @@ def main():
     path = 'data_fs'
     if (len(sys.argv)>1):
         path = sys.argv[1]
-    fname_front = 'C1--ATI_attempt_03_16_2020--'
-    if (len(sys.argv)>2):
-        fname_front = sys.argv[2]
     nwaves = 10
-    if (len(sys.argv)>3):
-        nwaves = int(sys.argv[3])
+    if (len(sys.argv)>2):
+        nwaves = int(sys.argv[2])
     wv = int(0)
-    fname = '%s/%s%05i.trc'%(path,fname_front,wv)
-    hname = '%s/%s.hist'%(path,fname_front)
-    (nseek,nvals) = getHeaderBytes(fname)
+    fname = '%s%05i.trc'%(path,wv)
+    hname = '%s.hist'%(path)
+    (nseek,nvals,times) = getHeaderBytesTimes(fname)
     
     parseddata = np.zeros(nvals,dtype=np.float32)
     data = np.zeros(nvals,dtype=np.int16)
@@ -93,34 +90,38 @@ def main():
     W_lowpass = getWeinerFilter(data,FREQ,cut = 1.0,noise = 0.0001)
     AC = getacFilter(data,FREQ,cut = 0.05)
     thresh = 1000 
-    negation = 1 # set to 0 for positive going signals, 1 or -1 for negative going
+    if (len(sys.argv)>3):
+        thresh = int(sys.argv[3])
+    negation = 1 # set to 1 for positive going signals, -1 for negative going
     if (len(sys.argv)>4):
-        thresh = int(sys.argv[4])
+        negation = int(sys.argv[4])
+
 
     tofs = []
+    shots = int(0)
     hout = np.zeros(2**12,int)
     bins = np.linspace(0,2**14,hout.shape[0]+1)
     for wv in range(nwaves):
-        fname = '%s/%s%05i.trc'%(path,fname_front,wv)
+        fname = '%s%05i.trc'%(path,wv)
         if not os.path.exists(fname):
             continue
         #parseddata = lecroyparser.ScopeData(fname)
-        oname = '%s/%s%05i.out'%(path,fname_front,wv)
+        oname = '%s%05i.out'%(path,wv)
         data = loadArrayBytes_int16(fname,nseek,nvals,byteorder = 'little')
-        y = np.fft.ifft(np.fft.fft(data)*W*AC).real
-        dy = np.fft.ifft(1j*FREQ*np.fft.fft(data)*W*AC).real
-        #DATA = np.fft.fft(sigmoid(y,2500,1000))*W_lowpass
-        #IDATA = np.fft.fft(sigmoid(y,2500,1000))*np.arange(y.shape[0])*W_lowpass
-        #num = np.fft.ifft(IDATA).real
-        #denom = np.fft.ifft(DATA).real
+        y = np.fft.ifft(np.fft.fft(negation*data)*W*AC).real
+        dy = np.fft.ifft(1j*FREQ*np.fft.fft(negation*data)*W*AC).real
         tofs = tofs + zeroCrossings((y * dy)/float(y.shape[0]),thresh)
+        shots += 1
         if wv%1000 == 0:
-            np.savetxt(oname,np.column_stack((data,y,dy)),fmt= '%f')
+            headstring = '(data,y,dy,y*dy/float(y.shape[0]))'
+            np.savetxt(oname,np.column_stack((times,data,y,dy,y*dy/float(y.shape[0]))),fmt= '%f',header=headstring)
             hout += np.histogram(tofs,bins)[0]
-            np.savetxt(hname,hout,fmt='%i')
+            headstring = 'shots,thresh,negation = (%i,%i,%i)'%(shots,thresh,negation)
+            np.savetxt(hname,hout,fmt='%i',header = headstring)
             tofs = []
     hout += np.histogram(tofs,bins)[0]
-    np.savetxt(hname,hout,fmt='%i')
+    headstring = 'shots,thresh,negation = (%i,%i,%i)'%(shots,thresh,negation)
+    np.savetxt(hname,hout,fmt='%i',header = headstring)
     return
 
 if __name__ == "__main__":

@@ -1,0 +1,20 @@
+Traceback (most recent call last):
+  File "./src/loadbinary.py", line 132, in <module>
+    main()
+  File "./src/loadbinary.py", line 117, in main
+    tofs = tofs + zeroCrossings((y * dy)/float(y.shape[0]),thresh)
+  File "./src/loadbinary.py", line 24, in zeroCrossings
+    tofs = tofs + [1./float(data[i]-data[i-1])*data[i] + float(i)]
+IndexError: index 20002 is out of bounds for axis 0 with size 20002
+Traceback (most recent call last):
+  File "./src/loadbinary.py", line 132, in <module>
+    main()
+  File "./src/loadbinary.py", line 84, in main
+    (nseek,nvals) = getHeaderBytes(fname)
+  File "./src/loadbinary.py", line 32, in getHeaderBytes
+    data = lecroyparser.ScopeData(fname)
+  File "/home/coffee/.local/lib/python3.7/site-packages/lecroyparser/__init__.py", line 52, in __init__
+    x, y = self.parseFile(path, sparse = sparse)
+  File "/home/coffee/.local/lib/python3.7/site-packages/lecroyparser/__init__.py", line 58, in parseFile
+    self.file = open(path, mode='rb')
+FileNotFoundError: [Errno 2] No such file or directory: './data_fs/03_16_2020_ZJL4g+_20Vacc/C1--ATI_attempt_03_16_2020--00000.trc'
