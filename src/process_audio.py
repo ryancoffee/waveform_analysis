@@ -58,19 +58,19 @@ def getWeinerFilter(data,FREQ,cut = 2.0,noise = 0.1):
     inds = np.where(np.abs(FREQ)<cut)
     c2 = 0.5*(1.+np.cos(FREQ[inds]*np.pi/cut))
     W[inds] = c2 / (c2 + noise)
-    return W
+    return np.tile(W,data.shape[1])
 
 def getacFilter(data,FREQ,cut = 0.2):
     AC = np.ones(data.shape[0],dtype=float)
     inds = np.where(np.abs(FREQ)<cut)
     AC[inds] = 0.5*(1. - np.cos(FREQ[inds]*np.pi/cut))
-    return AC
+    return np.tile(AC,data.shape[1])
 
 
 
 def main():
     if len(sys.argv[1])==1:
-        print('syntax is: ./src/loadbinary.py <path> <fname_front, not extension> <nwaves>')
+        print('syntax is: ./src/loadbinary.py <path/fname_front> <nwaves> <negation(1,-1)> <nrolls> <overlap>')
     path = 'data_fs'
     if (len(sys.argv)>1):
         path = sys.argv[1]
@@ -81,46 +81,48 @@ def main():
     fname = '%s%05i.trc'%(path,wv)
     hname = '%s.hist'%(path)
     (nseek,nvals,times) = getHeaderBytesTimes(fname)
+    print(nvals,times[2]-times[1])
+
+    negation = 1 # set to 1 for positive going signals, -1 for negative going
+    if (len(sys.argv)>3):
+        negation = int(sys.argv[3])
     
+    nrolls=20
+    overlap=2
+    if (len(sys.argv)>4):
+        nrolls = int(sys.argv[4])
+    if (len(sys.argv)>5):
+        overlap = int(sys.argv[5])
+
     parseddata = np.zeros(nvals,dtype=np.float32)
-    data = np.zeros(nvals,dtype=np.int16)
-    FREQ = np.fft.fftfreq(data.shape[0],1./40.) # 1/sampling rate in GHz
-    W = getWeinerFilter(data,FREQ,cut = 3.0,noise = 0.1)
+    data = np.zeros((nvals//nrolls,nrolls*overlap),dtype=np.int16)
+    outdata = np.zeros(nvals//nrolls,dtype=np.float32)
+    FREQ = np.fft.fftfreq(data.shape[0],times[2]-times[1]) 
+    print(data.shape)
+    W = getWeinerFilter(data,FREQ,cut = 4e3,noise = 0.01)
     W_lowpass = getWeinerFilter(data,FREQ,cut = 1.0,noise = 0.0001)
     AC = getacFilter(data,FREQ,cut = 0.05)
-    thresh = 1000 
-    if (len(sys.argv)>3):
-        thresh = int(sys.argv[3])
-    negation = 1 # set to 1 for positive going signals, -1 for negative going
-    if (len(sys.argv)>4):
-        negation = int(sys.argv[4])
 
 
-    tofs = []
-    shots = int(0)
-    hout = np.zeros(2**12,int)
-    bins = np.linspace(0,2**14,hout.shape[0]+1)
     for wv in range(nwaves):
         fname = '%s%05i.trc'%(path,wv)
         if not os.path.exists(fname):
             continue
-        #parseddata = lecroyparser.ScopeData(fname)
-        oname = '%s%05i.out'%(path,wv)
-        data = loadArrayBytes_int16(fname,nseek,nvals,byteorder = 'little')
-        y = np.fft.ifft(np.fft.fft(negation*data)*W*AC).real
-        dy = np.fft.ifft(1j*FREQ*np.fft.fft(negation*data)*W*AC).real
-        tofs = tofs + zeroCrossings((y * dy)/float(y.shape[0]),thresh)
-        shots += 1
-        if wv%1000 == 0:
-            headstring = '(data,y,dy,y*dy/float(y.shape[0]))'
-            np.savetxt(oname,np.column_stack((times,data,y,dy,y*dy/float(y.shape[0]))),fmt= '%f',header=headstring)
-            hout += np.histogram(tofs,bins)[0]
-            headstring = 'shots,thresh,negation = (%i,%i,%i)'%(shots,thresh,negation)
-            np.savetxt(hname,hout,fmt='%i',header = headstring)
-            tofs = []
-    hout += np.histogram(tofs,bins)[0]
-    headstring = 'shots,thresh,negation = (%i,%i,%i)'%(shots,thresh,negation)
-    np.savetxt(hname,hout,fmt='%i',header = headstring)
+        fulldata = loadArrayBytes_int16(fname,nseek,nvals,byteorder = 'little')
+        sz = data.shape[0]
+        for i in range(nrolls*overlap):
+            fulldata = np.roll(fulldata,i*sz//overlap)
+            data[:,i] = fulldata[:sz]
+        Y = np.abs(np.fft.fft(negation*data,axis=0)).real
+        outdata = np.column_stack((outdata,Y))
+        if wv%5 == 0:
+            oname = '%s%05i.powerspec'%(path,wv)
+            headstring = 'powerspec'
+            np.savetxt(oname,Y,fmt= '%f',header=headstring)
+            oname = '%s.powerspec'%(path)
+            headstring = 'rolling powerspec'
+            np.savetxt(oname,outdata,fmt= '%f',header=headstring)
+
     return
 
 if __name__ == "__main__":
