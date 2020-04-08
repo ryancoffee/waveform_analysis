@@ -96,6 +96,8 @@ def main():
 
     parseddata = np.zeros(nvals,dtype=np.float32)
     data = np.zeros((nvals//nrolls,nrolls*overlap),dtype=np.int16)
+    sz = data.shape[0]
+    window = 0.5*(1.+np.sin(np.arange(sz)*np.pi/sz))
     outdata = np.zeros(nvals//nrolls,dtype=np.float32)
     FREQ = np.fft.fftfreq(data.shape[0],times[2]-times[1]) 
     print(data.shape)
@@ -109,10 +111,9 @@ def main():
         if not os.path.exists(fname):
             continue
         fulldata = loadArrayBytes_int16(fname,nseek,nvals,byteorder = 'little')
-        sz = data.shape[0]
         for i in range(nrolls*overlap):
-            fulldata = np.roll(fulldata,i*sz//overlap)
-            data[:,i] = fulldata[:sz]
+            fulldata = np.roll(fulldata,-sz//overlap)
+            data[:,i] = fulldata[:sz]*window
         Y = np.abs(np.fft.fft(negation*data,axis=0)).real
         outdata = np.column_stack((outdata,Y))
         if wv%5 == 0:
