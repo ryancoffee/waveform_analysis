@@ -69,14 +69,19 @@ def getacFilter(data,FREQ,cut = 0.2):
 
 
 def main():
-    if len(sys.argv[1])==1:
-        print('syntax is: ./src/loadbinary.py <path> <fname_front, not extension> <nwaves>')
+    if len(sys.argv)<2:
+        print('syntax is: ./src/loadbinary.py <path/fname_front--(not numnber, not extension)> <nwaves> <roll filter vals>')
+        return
     path = 'data_fs'
     if (len(sys.argv)>1):
         path = sys.argv[1]
     nwaves = 10
     if (len(sys.argv)>2):
         nwaves = int(sys.argv[2])
+    nroll = 300
+    if (len(sys.argv)>3):
+        nroll = int(sys.argv[3])
+
     wv = int(0)
     fname = '%s%05i.trc'%(path,wv)
     hname = '%s.hist'%(path)
@@ -84,10 +89,14 @@ def main():
     
     parseddata = np.zeros(nvals,dtype=np.float32)
     data = np.zeros(nvals,dtype=np.int16)
-    FREQ = np.fft.fftfreq(data.shape[0],1./40.) # 1/sampling rate in GHz
+    FREQ = np.fft.fftfreq(data.shape[0],(times[1]-times[0])*1.0e9) ## in nanoseconds #1./40.) # 1/sampling rate in GHz
     W = getWeinerFilter(data,FREQ,cut = 3.0,noise = 0.1)
     W_lowpass = getWeinerFilter(data,FREQ,cut = 1.0,noise = 0.0001)
     AC = getacFilter(data,FREQ,cut = 0.05)
+    w_ac_filter = np.roll(np.fft.ifft(W*AC).real,nroll)
+    d_w_ac_filter = np.roll(np.fft.ifft(1j*FREQ*W*AC).real,nroll)
+    headstring = 'times\tw_ac\tderiv_w_ac'
+    np.savetxt('%s.filters'%(path),np.column_stack((times,w_ac_filter,d_w_ac_filter)),header=headstring)
     thresh = 1000 
     if (len(sys.argv)>3):
         thresh = int(sys.argv[3])
