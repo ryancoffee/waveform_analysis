@@ -187,34 +187,33 @@ c_err = 1.49050794213357
 d_err = 0.108991645953526
 thist = "data_fs/03_16_2020_CX60_V63+_and_6013E-S+_highcount/C1--ATI_attempt_03_16_2020.thist"
 ehist = "data_fs/03_16_2020_CX60_V63+_and_6013E-S+_highcount/C1--ATI_attempt_03_16_2020.ehist"
+thist2 = "data_fs/03_16_2020_ZJL4g+_20Vacc/C1--ATI_attempt_20V_03_16_2020.thist"
+ehist2 = "data_fs/03_16_2020_ZJL4g+_20Vacc/C1--ATI_attempt_20V_03_16_2020.ehist"
 ## Last datafile plotted: "data_fs/03_16_2020_CX60_V63+_and_6013E-S+_highcount/C1--ATI_attempt_03_16_2020.ehist"
 set xlabel 'energy [eV]'
 set ylabel 'counts'
-set term png size 1000,700
-set output 'figs/plotting.resolution.png'
-plot	g(x,170,42.3,.25) lw 2 lc 2 title '{/Symbol s} = .25',\
-	g(x,2500,31.45,.25) lw 2 lc 2 notitle,\
+set term png size 1200,800
+set output 'figs/plotting.resolution.both.png'
+set multiplot
+set size 1,.5
+set origin 0,.5
+set lmargin screen .15
+set rmargin screen .9
+set xrange [35:55]
+plot	ehist lw 1 lc -1 title '30V acceleration ATI spectrum',\
+	g(x,170,42.3,.25) lw 2 lc 2 title '{/Symbol s} = .25 eV',\
 	g(x,600,39.2,.25) lw 2 lc 2 notitle,\
-	g(x,35,46.95,.25) lw 2 lc 2 notitle,\
-	g(x,35,48.55,.25) lw 2 lc 2 notitle,\
-	g(x,20,48.55+1.55,.25) lw 2 lc 2 notitle,\
-	g(x,18,48.55+2*1.55,.25) lw 2 lc 2 notitle,\
-	g(x,10,48.55+3*1.55,.25) lw 2 lc 2 notitle,\
-	ehist lw 2 lc -1 title '30V acceleration ATI spectrum'
-
-thist2 = "data_fs/03_16_2020_ZJL4g+_20Vacc/C1--ATI_attempt_20V_03_16_2020.thist"
-ehist2 = "data_fs/03_16_2020_ZJL4g+_20Vacc/C1--ATI_attempt_20V_03_16_2020.ehist"
-set term png size 1000,700
-set output 'figs/plotting.resolution.20V.png'
-set xrange [25:75]
-plot	g(x,170,42.3,.25) lw 2 lc 2 title '{/Symbol s} = .25',\
-	g(x,2500,31.45,.25) lw 2 lc 2 notitle,\
-	g(x,600,39.2,.25) lw 2 lc 2 notitle,\
-	g(x,35,46.95,.25) lw 2 lc 2 notitle,\
-	g(x,35,48.55,.25) lw 2 lc 2 notitle,\
-	g(x,20,48.55+1.55,.25) lw 2 lc 2 notitle,\
-	g(x,18,48.55+2*1.55,.25) lw 2 lc 2 notitle,\
-	g(x,10,48.55+3*1.55,.25) lw 2 lc 2 notitle,\
-	ehist2 lw 2 lc -1 title '20V acceleration ATI spectrum'
+	g(x,35,48.6,.25) lw 2 lc 2 notitle,\
+	g(x,18,48.6+2*1.55,.25) lw 2 lc 2 notitle
+set origin 0,0
+set xrange [30:70]
+set yrange [1:200]
+plot	ehist2 lw 1 lc -1 title '20V acceleration ATI spectrum',\
+	g(x,100,33.1,.25) lw 2 lc 2 title '{/Symbol s} = .25 eV',\
+	g(x,40,45.1,.25) lw 2 lc 2 notitle,\
+	g(x,12,55.8,.25) lw 2 lc 2 notitle,\
+	g(x,5,66.8,.25) lw 2 lc 2 notitle
+unset multiplot
+	
 ## fit f(x) energiesfile u (log($1-50)):(log(1.55*($0+1)+30)) via a,b,c,d
 #    EOF
