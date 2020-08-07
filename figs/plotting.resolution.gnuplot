@@ -192,13 +192,13 @@ ehist2 = "data_fs/03_16_2020_ZJL4g+_20Vacc/C1--ATI_attempt_20V_03_16_2020.ehist"
 ## Last datafile plotted: "data_fs/03_16_2020_CX60_V63+_and_6013E-S+_highcount/C1--ATI_attempt_03_16_2020.ehist"
 set xlabel 'energy [eV]'
 set ylabel 'counts'
-set term png size 1200,800
+set term png size 1200,600
 set output 'figs/plotting.resolution.both.png'
 set multiplot
 set size 1,.5
 set origin 0,.5
-set lmargin screen .15
-set rmargin screen .9
+set lmargin screen .08
+set rmargin screen .97
 set xrange [35:55]
 plot	ehist lw 1 lc -1 title '30V acceleration ATI spectrum',\
 	g(x,170,42.3,.25) lw 2 lc 2 title '{/Symbol s} = .25 eV',\
