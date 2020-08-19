@@ -139,67 +139,68 @@ def main():
     sizeoftrace = getAndreiSize('%s/%s_HEADER.txt'%(path,fname))
     sz = sizeoftrace//8
     ninstances = 100
-    nbatches = 100
+    nbatches = 200
+    times = []
+    logtimes = []
+    data = []
+    FREQ = []
+    DDFILT = []
+    dd_bwd = 8. # this is in GHz
+    histthresh = .5 # .2
+    logic_bwd=1
+    LFILT = []
+    tstep_ns = 1./40
+    t0=35
+    print('using as tstep = \t%f'%(tstep_ns))
     for batch in range(nbatches):
-        data = np.fromfile('%s/%s'%(path,fname),count=sz*ninstances,offset=batch*ninstances*sizeoftrace,dtype=float).reshape(ninstances,sz).T
-        tstep_ns = 1./40
-        times = np.array([tstep_ns * i for i in range(data.shape[0])])
+        raw = np.fromfile('%s/%s'%(path,fname),count=sz*ninstances,offset=batch*ninstances*sizeoftrace,dtype=float)
+        data = raw.reshape(ninstances,sz).T
+        if batch ==0:
+            times = np.array([tstep_ns * i for i in range(data.shape[0])])
+            logtimes = np.column_stack([np.log(times-t0 + 1j*tstep_ns).real]*data.shape[1])
+            FREQ = np.fft.fftfreq(data.shape[0],tstep_ns) ## in nanoseconds #1./40.) # 1/sampling rate in GHz
+            DDFILT = np.array([(np.abs(FREQ)<dd_bwd) * np.cos(FREQ/dd_bwd*np.pi/2.) * (1.-np.cos(FREQ/dd_bwd*np.pi*2))]*data.shape[1]).T
+            LFILT = np.array([1./(1j*FREQ + logic_bwd)]*data.shape[1]).real.T
+            histinds = np.where((times>(t0+1))*(times<450))
+            b=np.linspace(1.0,6,2**12+1)
+            h0 = np.histogram(logtimes[histinds],bins=b)[0] 
 
         if batch ==0:
             sumsig = np.sum(data,axis=1)
+            np.savetxt('%s/%s.samplesig'%(path,fname),np.column_stack((times,data)))
         else:
             sumsig += np.sum(data,axis=1)
         
         np.savetxt('%s/%s.sumsig'%(path,fname),np.column_stack((times,sumsig)))
-        np.savetxt('%s/%s.sig'%(path,fname),np.column_stack((times,data)))
     
-        print('using as tstep = \t%f'%(tstep_ns))
 
         DATA = np.fft.fft(data.copy(),axis=0)
-        FREQ = np.fft.fftfreq(data.shape[0],tstep_ns) ## in nanoseconds #1./40.) # 1/sampling rate in GHz
-        bwd = 1.5 # this is in GHz
-        DDFILT = (np.abs(FREQ)<bwd) * np.cos(FREQ/bwd*np.pi/2.) * (1.-np.cos(FREQ/bwd*np.pi*2))
-        DD = np.array([DDFILT*DATA[:,i] for i in range(DATA.shape[1])])
-        out = np.fft.ifft(DD,axis=1).real
-        np.savetxt('%s/%s.fft'%(path,fname),np.column_stack( (FREQ,np.abs(DD.T)) ))
-        np.savetxt('%s/%s.back'%(path,fname),np.column_stack( (times,(out.T*data)) ))
-        logtimes = np.log(times-50 + 1j*tstep_ns).real
-        #logtimes = times
-        #NUM = np.row_stack([ np.fft.fft(out[i,:]*data[:,i]*logtimes) * .5*(1.+ np.cos(FREQ/bwd*np.pi) * (np.abs(FREQ)<bwd)) for i in range(data.shape[1])])
-        #DENOM = np.row_stack([np.fft.fft(out[i,:]*data[:,i]) * .5*(1.+ np.cos(FREQ/bwd*np.pi) * (np.abs(FREQ)<bwd)) for i in range(data.shape[1])]) 
-        #NUM = np.column_stack([ np.fft.fft(logtimes) * .5*(1.+ np.cos(FREQ/bwd*np.pi) * (np.abs(FREQ)<bwd)) for i in range(data.shape[1])])
-        DENOM = np.column_stack([ np.fft.fft(out[i,:]*data[:,i]) for i in range(data.shape[1])])
-        NUM = np.column_stack([ np.fft.fft(logtimes*out[i,:]*data[:,i]) for i in range(data.shape[1])])
-        print(NUM.shape)
-        print(FREQ.shape)
-        bwd=.15
-        num = [np.fft.ifft( NUM[:,i] * np.exp(-(FREQ/bwd)**2) / (1j*FREQ + 1)).real for i in range(NUM.shape[1])]
-        denom = [np.fft.ifft( DENOM[:,i] * np.exp(-(FREQ/bwd)**2) / (1j*FREQ + 1)).real for i in range(DENOM.shape[1])]
-        #DENOM = np.row_stack([np.fft.fft(out[i,:]*data[:,i]) * .5*(1.+ np.cos(FREQ/bwd*np.pi) * (np.abs(FREQ)<bwd)) for i in range(data.shape[1])]) 
-        #denom = np.fft.ifft(DENOM,axis=1).real
-        logtimesout = np.array(num).T/np.array(denom).T
-        print(logtimesout.shape)
+        DD = DDFILT*DATA
+        dderiv = np.fft.ifft(DD,axis=0).real
+        logic = dderiv*data
+        logic[np.where(logic<0)] = 0
         print('here we want the expectation of <log(t)>')
-        np.savetxt('%s/%s.logtimes'%(path,fname),np.column_stack( (times,logtimesout) ) )
-    
-        b=np.linspace(1.0,6,2**12+1)
-        #b=np.linspace(50,500,2**10+1)
-        inds = np.where((times>(50+1))*(times<450))
-        h0 = np.histogram(logtimes[inds],bins=b)[0] 
-        hmat = np.array([sigmoid((np.histogram(logtimesout[inds,i],bins=b)[0]-h0)*np.exp(-b[:-1]),.25,.025) for i in range(logtimesout.shape[1])]).T
-        #hmat = np.array([(np.histogram(logtimesout[:,i],bins=b)[0]) for i in range(logtimesout.shape[1])]).T
-    
-        np.savetxt('%s/%s.histlogtimes'%(path,fname),np.column_stack( (b[:-1],hmat) ) )
-    
-        if batch ==0:
-            hout = np.sum(hmat,axis=1)
+        if batch%50==0:
+            np.savetxt('%s/%s.%i.fft'%(path,fname,batch),np.column_stack( (FREQ,np.abs(DD)) ))
+            np.savetxt('%s/%s.%i.back'%(path,fname,batch),np.column_stack( (times,(dderiv*data)) ))
+            np.savetxt('%s/%s.%i.logic'%(path,fname,batch),np.column_stack( (times,logic) ))
+        DENOM = np.fft.fft(logic,axis=0)
+        NUM = np.fft.fft(logtimes*logic,axis=0)
+        num = np.fft.ifft( NUM * LFILT,axis=0).real # Fourier windowed integral
+        denom = np.fft.ifft( DENOM * LFILT,axis=0).real # Fourier windowed integral
+        logtimesout = num/denom
+        hmat = np.array([(np.histogram(logtimesout[histinds,i],bins=b)[0]*np.exp(-b[:-1])) for i in range(logtimesout.shape[1])]).T
+        hmat[np.where(hmat<.2)]=0
+        if batch%50==0:
+            np.savetxt('%s/%s.%i.logtimes'%(path,fname,batch),np.column_stack( (times,logtimesout) ) )
+            np.savetxt('%s/%s.%i.histlogtimes'%(path,fname,batch),np.column_stack( (b[:-1],hmat) ) )
+            np.savetxt('%s/%s.logtimes'%(path,fname),np.column_stack( (times,logtimesout) ) )
+        if batch == 0:
+            histsum = np.sum(hmat,axis=1)
         else:
-            hout += np.sum(hmat,axis=1)
-        np.savetxt('%s/%s.cumhistlogtimes'%(path,fname),np.column_stack( (b[:-1],hout) ) )
-    
-    
+            histsum += np.sum(hmat,axis=1)
+        np.savetxt('%s/%s.cumhistlogtimes'%(path,fname),np.column_stack( (b[:-1],histsum) ) )
         
-    
     return
     
     
