@@ -147,12 +147,13 @@ def main():
     DDFILT = []
     dd_bwd = 8. # this is in GHz
     histthresh = .5 # .2
-    logic_bwd=1
+    logic_bwd=2
     LFILT = []
     tstep_ns = 1./40
     t0=35
     print('using as tstep = \t%f'%(tstep_ns))
     for batch in range(nbatches):
+        print('Processing batch %i of %i instances'%(batch,ninstances))
         raw = np.fromfile('%s/%s'%(path,fname),count=sz*ninstances,offset=batch*ninstances*sizeoftrace,dtype=float)
         data = raw.reshape(ninstances,sz).T
         if batch ==0:
@@ -179,7 +180,7 @@ def main():
         dderiv = np.fft.ifft(DD,axis=0).real
         logic = dderiv*data
         logic[np.where(logic<0)] = 0
-        print('here we want the expectation of <log(t)>')
+        
         if batch%50==0:
             np.savetxt('%s/%s.%i.fft'%(path,fname,batch),np.column_stack( (FREQ,np.abs(DD)) ))
             np.savetxt('%s/%s.%i.back'%(path,fname,batch),np.column_stack( (times,(dderiv*data)) ))
@@ -203,62 +204,5 @@ def main():
         
     return
     
-    
-    
-    
-'''
-    W = getWeinerFilter(data,FREQ,cut = 3.0,noise = 0.1)
-    W_lowpass = getWeinerFilter(data,FREQ,cut = 1.0,noise = 0.0001)
-    AC = getacFilter(data,FREQ,cut = 0.05)
-    w_ac_filter = np.roll(np.fft.ifft(W*AC).real,nroll)
-    d_w_ac_filter = np.roll(np.fft.ifft(1j*FREQ*W*AC).real,nroll)
-    headstring = 'times\tw_ac\tderiv_w_ac'
-    np.savetxt('%s.filters'%(path),np.column_stack((times,w_ac_filter,d_w_ac_filter)),header=headstring)
-    thresh = 200 
-    if (len(sys.argv)>3):
-        thresh = int(sys.argv[3])
-    negation = 1 # set to 1 for positive going signals, -1 for negative going
-    if (len(sys.argv)>4):
-        negation = int(sys.argv[4])
-
-
-    tofs = []
-    ens = []
-    shots = int(0)
-    hout = np.zeros(2**12,int)
-    eout = np.zeros(2**12,int)
-    tbins = np.linspace(0,2**9,hout.shape[0]+1)
-    ebins = np.linspace(0,256,eout.shape[0]+1)
-    for wv in range(nwaves):
-        fname = '%s/%s--%05i.trc'%(path,fname_front,wv)
-        if not os.path.exists(fname):
-            continue
-        #parseddata = lecroyparser.ScopeData(fname)
-        oname = '%s/%s--%05i.out'%(path,fname_front,wv)
-        data = loadArrayBytes_int16(fname,nseek,nvals,byteorder = 'little')
-        y = np.fft.ifft(np.fft.fft(negation*data)*W*AC).real
-        dy = np.fft.ifft(1j*FREQ*np.fft.fft(negation*data)*W*AC).real
-        t,e = zeroCrossings2energy((y * dy)/float(y.shape[0]),thresh,tstep = tstep_ns,t0=50.)
-        tofs = tofs + list(t)
-        ens = ens + list(e)
-        shots += 1
-        if wv%1000 == 0:
-            headstring = '(data,y,dy,y*dy/float(y.shape[0]))'
-            np.savetxt(oname,np.column_stack((times,data,y,dy,y*dy/float(y.shape[0]))),fmt= '%f',header=headstring)
-            hout += np.histogram(tofs,tbins)[0]
-            eout += np.histogram(ens,ebins)[0]
-            headstring = 'shots,thresh,negation = (%i,%i,%i)'%(shots,thresh,negation)
-            np.savetxt(hname,np.column_stack((tbins[:-1],hout)),fmt='%.2f',header = headstring)
-            np.savetxt(ename,np.column_stack((ebins[:-1],eout)),fmt='%.2f',header = headstring)
-            tofs = []
-            ens = []
-    hout += np.histogram(tofs,tbins)[0]
-    eout += np.histogram(ens,ebins)[0]
-    headstring = 'shots,thresh,negation = (%i,%i,%i)'%(shots,thresh,negation)
-    np.savetxt(hname,np.column_stack((tbins[:-1],hout)),fmt='%.2f',header = headstring)
-    np.savetxt(ename,np.column_stack((ebins[:-1],eout)),fmt='%.2f',header = headstring)
-    return
-    '''
-
 if __name__ == "__main__":
     main()
