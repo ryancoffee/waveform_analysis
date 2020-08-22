@@ -146,8 +146,9 @@ def main():
     FREQ = []
     DDFILT = []
     dd_bwd = 8. # this is in GHz
-    histthresh = .5 # .2
-    logic_bwd=2
+    histthresh = .4 # .4 seems the best for up to 100eV electrons, only %.1f SHould make the histthresh also a function of the log(tof)
+    # try building a histogram of peak hights versus log(tof) and use that to decide on the threshold functon
+    logic_bwd=8
     LFILT = []
     tstep_ns = 1./40
     t0=35
@@ -161,7 +162,9 @@ def main():
             logtimes = np.column_stack([np.log(times-t0 + 1j*tstep_ns).real]*data.shape[1])
             FREQ = np.fft.fftfreq(data.shape[0],tstep_ns) ## in nanoseconds #1./40.) # 1/sampling rate in GHz
             DDFILT = np.array([(np.abs(FREQ)<dd_bwd) * np.cos(FREQ/dd_bwd*np.pi/2.) * (1.-np.cos(FREQ/dd_bwd*np.pi*2))]*data.shape[1]).T
-            LFILT = np.array([1./(1j*FREQ + logic_bwd)]*data.shape[1]).real.T
+            #LFILT = np.array([1./(1j*FREQ + logic_bwd)]*data.shape[1]).real.T
+            fmin = np.abs(FREQ[1])
+            LFILT = np.tile( np.array([np.tanh(abs(f)/logic_bwd)/(1j*f/logic_bwd + 1) for f in FREQ]).real,(data.shape[1],1)).T
             histinds = np.where((times>(t0+1))*(times<450))
             b=np.linspace(1.0,6,2**12+1)
             h0 = np.histogram(logtimes[histinds],bins=b)[0] 
@@ -191,7 +194,7 @@ def main():
         denom = np.fft.ifft( DENOM * LFILT,axis=0).real # Fourier windowed integral
         logtimesout = num/denom
         hmat = np.array([(np.histogram(logtimesout[histinds,i],bins=b)[0]*np.exp(-b[:-1])) for i in range(logtimesout.shape[1])]).T
-        hmat[np.where(hmat<.2)]=0
+        hmat[np.where(hmat<histthresh)]=0
         if batch%50==0:
             np.savetxt('%s/%s.%i.logtimes'%(path,fname,batch),np.column_stack( (times,logtimesout) ) )
             np.savetxt('%s/%s.%i.histlogtimes'%(path,fname,batch),np.column_stack( (b[:-1],hmat) ) )
@@ -200,7 +203,7 @@ def main():
             histsum = np.sum(hmat,axis=1)
         else:
             histsum += np.sum(hmat,axis=1)
-        np.savetxt('%s/%s.cumhistlogtimes'%(path,fname),np.column_stack( (b[:-1],histsum) ) )
+        np.savetxt('%s/%s.cumhistlogtimes_%.1f_%.1fhistthresh'%(path,fname,logic_bwd,histthresh),np.column_stack( (b[:-1],histsum) ) )
         
     return
     
