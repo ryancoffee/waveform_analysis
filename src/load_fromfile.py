@@ -123,6 +123,24 @@ def getAndreiSize(fname):
     f.close()
     return 8
 
+def logTlogE(x):
+#Final set of parameters            Asymptotic Standard Error
+# x0=3.6
+#=======================            ==========================
+#a               = 4.39133          +/- 0.001283     (0.02922%)
+#b               = -0.72            +/- 0.01098      (1.525%)
+
+#correlation matrix of the fit parameters:
+#                a      b      
+#a               1.000 
+#b               0.266  1.000 
+    x0=3.6
+    theta = np.array([4.39133,-0.72])
+    X = np.array([1.,x-x0])
+    return theta.dot(X)
+
+def logTlogE_jac(x):
+    return x
 
 def main():
     if len(sys.argv)<2:
@@ -146,7 +164,7 @@ def main():
     FREQ = []
     DDFILT = []
     dd_bwd = 8. # this is in GHz
-    histthresh = .4 # .4 seems the best for up to 100eV electrons, only %.1f SHould make the histthresh also a function of the log(tof)
+    histthresh = .2 # .4 seems the best for up to 100eV electrons, only %.1f SHould make the histthresh also a function of the log(tof)
     # try building a histogram of peak hights versus log(tof) and use that to decide on the threshold functon
     logic_bwd=8
     LFILT = []
@@ -166,7 +184,9 @@ def main():
             fmin = np.abs(FREQ[1])
             LFILT = np.tile( np.array([np.tanh(abs(f)/logic_bwd)/(1j*f/logic_bwd + 1) for f in FREQ]).real,(data.shape[1],1)).T
             histinds = np.where((times>(t0+1))*(times<450))
-            b=np.linspace(1.0,6,2**12+1)
+            #b=np.linspace(1.0,6,2**12+1)
+            b=np.linspace(2.5,4.5,2**12+1)
+            ebins=np.array([math.exp(logTlogE(v)) for v in b[:-1]])
             h0 = np.histogram(logtimes[histinds],bins=b)[0] 
 
         if batch ==0:
@@ -203,7 +223,7 @@ def main():
             histsum = np.sum(hmat,axis=1)
         else:
             histsum += np.sum(hmat,axis=1)
-        np.savetxt('%s/%s.cumhistlogtimes_%.1f_%.1fhistthresh'%(path,fname,logic_bwd,histthresh),np.column_stack( (b[:-1],histsum) ) )
+        np.savetxt('%s/%s.cumhistlogtimes_%.1f_%.1fhistthresh'%(path,fname,logic_bwd,histthresh),np.column_stack( (b[:-1],ebins,histsum) ) )
         
     return
     
