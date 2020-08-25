@@ -8,6 +8,8 @@ import os
 import re
 import math
 
+from DataUtils import mypoly
+
 def zeroCrossings2energy(data,thresh,tstep = 1.,t0 = 50.):
     # from fitting Ave simulations with theta0 = memmap([ 6.39445393, -0.03775023, -0.46237318])
     # this is log(t - t0[ns]) = [6.39445393, -0.03775023, -0.46237318].T dot [1,ln(vret[V]),ln(ekin[eV])]
@@ -44,6 +46,28 @@ def zeroCrossings2energy(data,thresh,tstep = 1.,t0 = 50.):
 
 def sigmoid(x,c,w):
     return 1./(1.+np.exp(-(x-c)/w))
+
+def zeroFit(times,data,thresh):
+    tofs = []
+    sz = data.shape[0]
+    i = int(0)
+    while i < data.shape[0]-2:
+        while data[i] > -thresh:
+            i += 1
+            if i==sz-2: return tofs
+        while data[i+1] < data[i]:
+            i += 1
+            if i==sz-2: return tofs
+        j=int(1)
+        y = [times[i+j]]
+        x = [data[i+j]]
+        while data[i+j+1]>data[i+j] and i+j<sz-2:
+            j += 1
+            y += [times[i+j]]
+            x += [data[i+j]]
+        tofs += [ np.linalg.pinv( mypoly(np.array(x).copy().astype(float),order=3) ).dot(np.array(y).astype(float))[0] ]
+        i += j
+    return tofs
 
 def zeroCrossings(data,thresh,tstep = 1.):
     tofs = []
@@ -161,13 +185,17 @@ def main():
     data = []
     FREQ = []
     DDFILT = []
-    dd_bwd = 8. # this is in GHz
-    histthresh = .5 # .4 seems the best for up to 100eV electrons, only %.1f SHould make the histthresh also a function of the log(tof)
-    # try building a histogram of peak hights versus log(tof) and use that to decide on the threshold functon
-    logic_bwd=0.1
+    bwd_dd = 2. # this is in GHz
+    bwd_d = 4. # this is in GHz
+    bwd = 8.
+    histthresh = .002 
+    logic_bwd=2
     LFILT = []
     tstep_ns = 1./40
-    #nkern_dd = int(1./(tstep_ns * dd_bwd * 2))*2 + 1
+    nkern = int(1./(tstep_ns * bwd * 2))*2 + 1
+    nkern_d = int(1./(tstep_ns * bwd_d * 2))*2 + 1
+    nkern_dd = int(1./(tstep_ns * bwd_dd * 2))*2 + 1
+    print('kernel lengths:\t%i\t%i\t%i'%(nkern,nkern_d,nkern_dd))
     #nkern_logic = int(1./(tstep_ns * logic_bwd * 2))*2 + 1
     t0=35
     print('using as tstep = \t%f'%(tstep_ns))
@@ -176,21 +204,34 @@ def main():
         raw = np.fromfile('%s/%s'%(path,fname),count=sz*ninstances,offset=batch*ninstances*sizeoftrace,dtype=float)
         data = raw.reshape(ninstances,sz).T
         if batch ==0:
-            #t_kernel = np.linspace(0,tstep_ns*nkern_dd,nkern) - tstep_ns*nkern_dd/2
-            #kern_dd = np.cos(math.pi*3/2*t_kernel/dd_bwd) * np.cos(math.pi/2*t_kernel/dd_bwd)
+            kern = [math.sin(math.pi*i/nkern) for i in range(nkern)]
+            kern_d = [-math.sin(2*math.pi*i/nkern_d)*math.sin(math.pi*i/nkern_d) for i in range(nkern_d)] 
+            kern_dd = [-math.sin(3*math.pi*i/nkern_dd)*math.sin(math.pi*i/nkern_dd) for i in range(nkern_dd)] 
             times = np.array([tstep_ns * i for i in range(data.shape[0])])
-            logtimes = np.column_stack([np.log(times-t0 + 1j*tstep_ns).real]*data.shape[1])
+            inds = np.where(times>t0+1)
+            logtimes = np.zeros(times.shape[0])
+            logtimes[inds] = np.log(times[inds])
+            logtimes_mat = np.column_stack([np.log(times-t0 + 1j*tstep_ns).real]*data.shape[1])
+            filt = np.zeros(times.shape,dtype=float)
+            filt_d = np.zeros(times.shape,dtype=float)
+            filt_dd = np.zeros(times.shape,dtype=float)
+            filt[:nkern] = kern
+            filt_d[:nkern_d] = kern_d
+            filt_dd[:nkern_dd] = kern_dd
+            FILT = np.tile(np.fft.fft(np.roll(filt,-nkern//2)),(data.shape[1],1)).T
+            DFILT = np.tile(np.fft.fft(np.roll(filt_d,-nkern_d//2)),(data.shape[1],1)).T
+            DDFILT = np.tile(np.fft.fft(np.roll(filt_dd,-nkern_dd//2)),(data.shape[1],1)).T
             FREQ = np.fft.fftfreq(data.shape[0],tstep_ns) ## in nanoseconds #1./40.) # 1/sampling rate in GHz
-            DDFILT = np.array([(np.abs(FREQ)<dd_bwd) * np.cos(FREQ/dd_bwd*np.pi/2.) * (1.-np.cos(FREQ/dd_bwd*np.pi*2))]*data.shape[1]).T
+                
+            #DDFILT = np.array([(np.abs(FREQ)<bwd_dd) * np.cos(FREQ/bwd_dd*np.pi/2.) * (1.-np.cos(FREQ/bwd_dd*np.pi*2))]*data.shape[1]).T
             #LFILT = np.array([1./(1j*FREQ + logic_bwd)]*data.shape[1]).real.T
             #LFILT = np.tile(np.array([np.sinc(f/logic_bwd) for f in FREQ]).real,(data.shape[1],1)).T # this is a rolling box integral, sinc(x) is FT(box)
-            LFILT = np.tile(np.array([np.cos(math.pi/2*f/logic_bwd)*(abs(f)<logic_bwd) for f in FREQ]).real,(data.shape[1],1)).T # this is a rolling box integral, sinc(x) is FT(box)
             #For the expectation value, however, we can use a Gaussian, or any other convolution kernel, since we will divide by this as well.
-            histinds = np.where((times>(t0+1))*(times<450))
-            #b=np.linspace(1.0,6,2**12+1)
-            b=np.linspace(2.5,4.5,2**12+1)
+            #histinds = np.where((times>(t0+1))*(times<450))
+            #b=np.linspace(0,1e3,2**12+1)
+            b=np.linspace(2,6,2**12+1)
             ebins=np.array([math.exp(logTlogE(v)) for v in b[:-1]])
-            h0 = np.histogram(logtimes[histinds],bins=b)[0] 
+            #h0 = np.histogram(logtimes_mat[histinds],bins=b)[0] 
 
         if batch ==0:
             sumsig = np.sum(data,axis=1)
@@ -202,17 +243,25 @@ def main():
     
 
         DATA = np.fft.fft(data.copy(),axis=0)
+        D = DFILT*DATA
         DD = DDFILT*DATA
+        deriv = np.fft.ifft(D,axis=0).real
         dderiv = np.fft.ifft(DD,axis=0).real
-        logic = dderiv*data
-        logic[np.where(logic<0)] = 0
+        y = deriv*data
         
         if batch%50==0:
-            np.savetxt('%s/%s.%i.fft'%(path,fname,batch),np.column_stack( (FREQ,np.abs(DD)) ))
-            np.savetxt('%s/%s.%i.back'%(path,fname,batch),np.column_stack( (times,(dderiv*data)) ))
-            np.savetxt('%s/%s.%i.logic'%(path,fname,batch),np.column_stack( (times,logic) ))
+            np.savetxt('%s/%s.%i.dfft'%(path,fname,batch),np.column_stack( (FREQ,np.abs(D)) ))
+            np.savetxt('%s/%s.%i.ddfft'%(path,fname,batch),np.column_stack( (FREQ,np.abs(DD)) ))
+            np.savetxt('%s/%s.%i.dback'%(path,fname,batch),np.column_stack( (times,deriv) ))
+            np.savetxt('%s/%s.%i.ddback'%(path,fname,batch),np.column_stack( (times,dderiv) ))
+            np.savetxt('%s/%s.%i.dlogic'%(path,fname,batch),np.column_stack( (times,y) ))
+        logtlist = []
+        for i in range(data.shape[1]):
+            logtlist += zeroFit(logtimes,y[:,i],thresh=histthresh)
+
+        '''
         DENOM = np.fft.fft(logic,axis=0)
-        NUM = np.fft.fft(logtimes*logic,axis=0)
+        NUM = np.fft.fft(logtimes_mat*logic,axis=0)
         num = np.fft.ifft( NUM * LFILT,axis=0).real # Fourier windowed integral
         denom = np.fft.ifft( DENOM * LFILT,axis=0).real # Fourier windowed integral
         logtimesout = num/denom
@@ -222,11 +271,14 @@ def main():
             np.savetxt('%s/%s.%i.logtimes'%(path,fname,batch),np.column_stack( (times,logtimesout) ) )
             np.savetxt('%s/%s.%i.histlogtimes'%(path,fname,batch),np.column_stack( (b[:-1],hmat) ) )
             np.savetxt('%s/%s.logtimes'%(path,fname),np.column_stack( (times,logtimesout) ) )
+        '''
         if batch == 0:
-            histsum = np.sum(hmat,axis=1)
+            histsum = np.histogram(logtlist,bins=b)[0]
+            #histsum = np.sum(hmat,axis=1)
         else:
-            histsum += np.sum(hmat,axis=1)
-        np.savetxt('%s/%s.cumhistlogtimes_%.1f_%.1fhistthresh'%(path,fname,logic_bwd,histthresh),np.column_stack( (b[:-1],ebins,histsum) ) )
+            histsum += np.histogram(logtlist,bins=b)[0]
+            #histsum += np.sum(hmat,axis=1)
+        np.savetxt('%s/%s.zeroFit_histlogtimes_%.1f_%.1fhistthresh'%(path,fname,bwd_d,histthresh),np.column_stack( (b[:-1],ebins,histsum) ) )
         
     return
     
