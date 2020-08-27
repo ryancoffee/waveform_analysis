@@ -47,6 +47,34 @@ def zeroCrossings2energy(data,thresh,tstep = 1.,t0 = 50.):
 def sigmoid(x,c,w):
     return 1./(1.+np.exp(-(x-c)/w))
 
+def zeroFitRoot(lt,d,thresh=1.):
+    tofs = []
+    sz = d.shape[0]
+    x = []
+    y = []
+    order = 3
+    i = 0
+    while i < sz-10:
+        while d[i] < thresh:
+            i += 1
+            if i==sz-10: return tofs
+        while d[i+1]>d[i] and i<sz-10:
+            i += 1
+        while d[i+1]<d[i] and i<sz-10:
+            x += [lt[i]]
+            y += [d[i]]
+            i += 1
+
+        x0 = np.mean(x)
+        theta = np.linalg.pinv( mypoly(np.array(x).astype(float),order=order) ).dot(np.array(y).astype(float))
+        for j in range(2):
+            X0 = np.array([np.power(x0,int(i)) for i in range(order+1)])
+            x0 -= theta.dot(X0)/theta.dot([i*X0[(i+1)%(order+1)] for i in range(order+1)])
+        tofs += [x0]
+        x = []
+        y = []
+    return tofs
+
 def zeroFit(lt,d,thresh=1.):
     tofs = []
     sz = d.shape[0]
@@ -198,18 +226,16 @@ def main():
     data = []
     FREQ = []
     DDFILT = []
-    bwd_dd = 1. # this is in GHz
+    bwd_dd = 1 # this is in GHz
     bwd_d = 2. # this is in GHz
-    bwd = 4. # this is in GHz... very strongly affects the threshold
-    histthresh = .001 
-    logic_bwd=2
+    bwd = 3. # this is in GHz... very strongly affects the threshold
+    histthresh = .01 # .001 I think for the 70V ATI run 08_14_20 and .01 for the 100V ATI run 08_20_20
     LFILT = []
     tstep_ns = 1./40
     nkern = int(1./(tstep_ns * bwd * 2))*2 + 1
     nkern_d = int(1./(tstep_ns * bwd_d * 2))*2 + 1
     nkern_dd = int(1./(tstep_ns * bwd_dd * 2))*2 + 1
     print('kernel lengths:\t%i\t%i\t%i'%(nkern,nkern_d,nkern_dd))
-    #nkern_logic = int(1./(tstep_ns * logic_bwd * 2))*2 + 1
     t0=35
     print('using as tstep = \t%f'%(tstep_ns))
     for batch in range(nbatches):
@@ -272,9 +298,10 @@ def main():
             np.savetxt('%s/%s.%i.dlogic'%(path,fname,batch),np.column_stack( (logtimes,y) ))
         logtlist = []
         for i in range(data.shape[1]):
-            #logtlist += zeroCrossings(logtimes,y[:,i],thresh=histthresh)
             #logtlist += zeroCrossingTimes(times,y[:,i],thresh=histthresh)
-            logtlist += zeroFit(logtimes,y[:,i],thresh=histthresh)
+            #logtlist += zeroCrossings(logtimes,y[:,i],thresh=histthresh)
+            #logtlist += zeroFit(logtimes,y[:,i],thresh=histthresh)
+            logtlist += zeroFitRoot(logtimes,y[:,i],thresh=histthresh)
 
         if batch == 0:
             histsum = np.histogram(logtlist,bins=b)[0]
@@ -282,7 +309,7 @@ def main():
         else:
             histsum += np.histogram(logtlist,bins=b)[0]
             #histsum += np.sum(hmat,axis=1)
-        np.savetxt('%s/%s.zeroCrossings_fit_histlogtimes_%.1f_%.3fhistthresh'%(path,fname,bwd_d,histthresh),np.column_stack( (b[:-1],ebins,histsum) ) )
+        np.savetxt('%s/%s.zeroCrossings_fitRoot_histlogtimes_%.1f_%.1f_%.1f_%.3fhistthresh'%(path,fname,bwd,bwd_d,bwd_dd,histthresh),np.column_stack( (b[:-1],ebins,histsum) ) )
         
     return
     
