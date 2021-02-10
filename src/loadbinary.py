@@ -196,7 +196,6 @@ def main():
     oname = '%s/%s.logic_vector_spect.out'%(path,fname_front)
     headstring = 'freqstep = %.3f [ns]\n#(data,y,dy,y*dy/float(y.shape[0]))'%FREQ[1]
     np.savetxt(oname,np.column_stack((DATAAVG/shots/nvals,YAVG/shots/nvals,DYAVG/shots/nvals,SAVG/shots/nvals)),fmt='%.3f',header=headstring)
-    
     hout += np.histogram(tofs,tbins)[0]
     eout += np.histogram(ens,ebins)[0]
     headstring = 'shots,thresh,negation = (%i,%i,%i)'%(shots,thresh,negation)

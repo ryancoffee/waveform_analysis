@@ -102,9 +102,9 @@ set mcbtics default
 set mrtics default
 set nomttics
 set xtics border in scale 1,0.5 mirror norotate  autojustify
-set xtics  norangelimit logscale autofreq 
+set xtics  norangelimit autofreq 
 set ytics border in scale 1,0.5 mirror norotate  autojustify
-set ytics  norangelimit logscale autofreq 
+set ytics  norangelimit autofreq 
 set ztics border in scale 1,0.5 nomirror norotate  autojustify
 set ztics  norangelimit autofreq 
 unset x2tics
@@ -143,9 +143,6 @@ set cbrange [ * : * ] noreverse writeback
 set rlabel "" 
 set rlabel  font "" textcolor lt -1 norotate
 set rrange [ * : * ] noreverse writeback
-unset logscale
-set logscale y 10
-set logscale x 10
 unset jitter
 set zero 1e-08
 set lmargin  -1
@@ -167,7 +164,37 @@ set fontpath
 set psdir
 set fit brief errorvariables nocovariancevariables errorscaling prescale nowrap v5
 GNUTERM = "qt"
-file = "./waveforms/01_18_2021/board3Tests/chan5/C1--Trace.logic_vector_spect.out"
+spectfile = "./waveforms/01_18_2021/board3Tests/chan5/C1--Trace.logic_vector_spect.out"
+wavefile(i) = sprintf('./waveforms/01_18_2021/board3Tests/chan5/C1--Trace--%05i.out',i)
 ## Last datafile plotted: "./waveforms/01_18_2021/board3Tests/chan5/C1--Trace.logic_vector_spect.out"
-plot file u (.002*$0):1,file u (.002*$0):2,file u (.002*$0):3,file u (.002*$0):4
+wv = 10
+set term png size 800,800
+set output './figs/plotting.waveformspect.png'
+set multiplot
+set label 1 'a' at screen .02,.975 font 'Sans,24'
+set label 2 'b' at screen .02,.475 font 'Sans,24'
+set size 1,.5
+set origin 0,0.5
+set lmargin screen .15
+set rmargin screen .9
+set xlabel 'time [ns]'
+set ylabel 'signal [arb. units]'
+set xrange [128:133]
+set key bottom left
+plot 	wavefile(wv) u (.025*$0):1 title 'sig',\
+	wavefile(wv) u (.025*$0):4 lw 2 title 'logic'
+set origin 0,0
+set logscale y 10 
+set logscale x 2
+set xrange [.125:8]
+set yrange [1e3:1e7]
+set xlabel 'frequency [GHz]'
+set ylabel 'power spectrum [arb. units]'
+plot 	spectfile u (.002*$0):1 title 'sig',\
+	spectfile u (.002*$0):4 lw 2 title 'logic'
+unset multiplot 
 #    EOF
+	#wavefile(wv) u (.025*$0):2 title 'filt',\
+	#wavefile(wv) u (.025*$0):3 title 'deriv',\
+	#spectfile u (.002*$0):2 title 'filt',\
+	#spectfile u (.002*$0):3 title 'deriv',\
