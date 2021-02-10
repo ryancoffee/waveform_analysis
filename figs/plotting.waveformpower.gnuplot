@@ -181,6 +181,7 @@ set xlabel 'time [ns]'
 set ylabel 'signal [arb. units]'
 set xrange [128:133]
 set key bottom left
+set mxtics 6
 plot 	wavefile(wv) u (.025*$0):1 title 'sig',\
 	wavefile(wv) u (.025*$0):4 lw 2 title 'logic'
 set origin 0,0
@@ -190,6 +191,7 @@ set xrange [.125:8]
 set yrange [1e3:1e7]
 set xlabel 'frequency [GHz]'
 set ylabel 'power spectrum [arb. units]'
+set mxtics 4
 plot 	spectfile u (.002*$0):1 title 'sig',\
 	spectfile u (.002*$0):4 lw 2 title 'logic'
 unset multiplot 
