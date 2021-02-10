@@ -33,8 +33,6 @@ def zeroCrossings2energy(data,thresh,tstep = 1.,t0 = 50.):
     # a               = 12.6565          +/- 0.2341       (1.85%)
     # b               = -2.79381         +/- 0.1044       (3.737%)
     # c               = 0.18091          +/- 0.01161      (6.417%)
-
-
     c = np.array([12.6565,-2.79381,0.18091])
     tofs = zeroCrossings(data,thresh,tstep)
     logt = [math.log(v-t0) for v in tofs if (v>t0)]
@@ -131,9 +129,15 @@ def main():
     ename = '%s/%s.ehist'%(path,fname_front)
     tofsname = '%s/%s.tofs'%(path,fname_front)
     (nseek,nvals,times) = getHeaderBytesTimes(fname)
-    tstep_ns = (times[1]-times[0])*1.0e9 
+    tstep_ns = float(int((times[1]-times[0])*1.0e13+.25))/float(1e4)
     print(tstep_ns)
     parseddata = np.zeros(nvals,dtype=np.float32)
+
+    DATAAVG = np.zeros(nvals,dtype=float)
+    YAVG = np.zeros(nvals,dtype=float)
+    DYAVG = np.zeros(nvals,dtype=float)
+    SAVG = np.zeros(nvals,dtype=float)
+
     data = np.zeros(nvals,dtype=np.int16)
     FREQ = np.fft.fftfreq(data.shape[0],tstep_ns) ## in nanoseconds #1./40.) # 1/sampling rate in GHz
     W = getWeinerFilter(data,FREQ,cut = 3.0,noise = 0.1)
@@ -141,8 +145,8 @@ def main():
     AC = getacFilter(data,FREQ,cut = 0.05)
     w_ac_filter = np.roll(np.fft.ifft(W*AC).real,nroll)
     d_w_ac_filter = np.roll(np.fft.ifft(1j*FREQ*W*AC).real,nroll)
-    headstring = 'times\tw_ac\tderiv_w_ac'
-    np.savetxt('%s.filters'%(path),np.column_stack((times,w_ac_filter,d_w_ac_filter)),header=headstring)
+    headstring = 'times[ns]\tw_ac\tderiv_w_ac'
+    np.savetxt('%s.filters'%(path),np.column_stack((1e9*times,w_ac_filter,d_w_ac_filter)),header=headstring)
     thresh = 200 
     if (len(sys.argv)>3):
         thresh = int(sys.argv[3])
@@ -163,17 +167,25 @@ def main():
         if not os.path.exists(fname):
             continue
         #parseddata = lecroyparser.ScopeData(fname)
-        oname = '%s/%s--%05i.out'%(path,fname_front,wv)
         data = loadArrayBytes_int16(fname,nseek,nvals,byteorder = 'little')
-        y = np.fft.ifft(np.fft.fft(negation*data)*W*AC).real
-        dy = np.fft.ifft(1j*FREQ*np.fft.fft(negation*data)*W*AC).real
-        t,e = zeroCrossings2energy((y * dy)/float(y.shape[0]),thresh,tstep = tstep_ns,t0=50.)
+        DATA = np.fft.fft(negation*data)
+        Y = DATA*W*AC
+        y = np.fft.ifft(Y).real
+        DATAAVG += np.power(np.abs(DATA),int(2))
+        DY = 1j*FREQ*np.fft.fft(negation*data)*W*AC
+        YAVG += np.power(np.abs(Y),int(2))
+        DYAVG += np.power(np.abs(DY),int(2))
+        dy = np.fft.ifft(DY).real
+        s = (y * dy)/float(y.shape[0])
+        SAVG += np.power(np.abs(np.fft.fft(s)),int(2))
+        t,e = zeroCrossings2energy(s,thresh,tstep = tstep_ns,t0=50.)
         tofs = tofs + list(t)
         ens = ens + list(e)
         shots += 1
-        if wv%1000 == 0:
-            headstring = '(data,y,dy,y*dy/float(y.shape[0]))'
-            np.savetxt(oname,np.column_stack((times,data,y,dy,y*dy/float(y.shape[0]))),fmt= '%f',header=headstring)
+        if wv%10 == 0:
+            oname = '%s/%s--%05i.out'%(path,fname_front,wv)
+            headstring = 'tstep = %.3f [ns]\n#(data,y,dy,y*dy/float(y.shape[0]))'%tstep_ns
+            np.savetxt(oname,np.column_stack((data,y,dy,y*dy/float(y.shape[0]))),fmt= '%f',header=headstring)
             hout += np.histogram(tofs,tbins)[0]
             eout += np.histogram(ens,ebins)[0]
             headstring = 'shots,thresh,negation = (%i,%i,%i)'%(shots,thresh,negation)
@@ -181,6 +193,10 @@ def main():
             np.savetxt(ename,np.column_stack((ebins[:-1],eout)),fmt='%.2f',header = headstring)
             tofs = []
             ens = []
+    oname = '%s/%s.logic_vector_spect.out'%(path,fname_front)
+    headstring = 'freqstep = %.3f [ns]\n#(data,y,dy,y*dy/float(y.shape[0]))'%FREQ[1]
+    np.savetxt(oname,np.column_stack((DATAAVG/shots/nvals,YAVG/shots/nvals,DYAVG/shots/nvals,SAVG/shots/nvals)),fmt='%.3f',header=headstring)
+    
     hout += np.histogram(tofs,tbins)[0]
     eout += np.histogram(ens,ebins)[0]
     headstring = 'shots,thresh,negation = (%i,%i,%i)'%(shots,thresh,negation)
