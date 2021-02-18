@@ -10,7 +10,7 @@
 #    	gnuplot home:     http://www.gnuplot.info
 #    	faq, bugs, etc:   type "help FAQ"
 #    	immediate help:   type "help"  (plot window: hit 'h')
-# set terminal qt 0 font "Sans,9"
+# set terminal qt 1 font "Sans,9"
 # set output
 unset clip points
 set clip one
@@ -49,7 +49,11 @@ set key noinvert samplen 4 spacing 1 width 0 height 0
 set key maxcolumns 0 maxrows 0
 set key noopaque
 unset label
+set label 1 "high frequency\nedge of signal" at 2.00000, 2.00000, 0.00000 center norotate back nopoint
+set label 2 "normalize to\nlow frequency\nsignal power" at 0.500000, 200.000, 0.00000 center norotate back nopoint
 unset arrow
+set arrow 1 from 2.00000, 3.00000, 0.00000 to 2.00000, 10.0000, 0.00000 head back filled linewidth 1.000 dashtype solid
+set arrow 2 from 0.500000, 300.000, 0.00000 to 0.500000, 1000.00, 0.00000 head back filled linewidth 1.000 dashtype solid
 set style increment default
 unset style line
 unset style arrow
@@ -102,9 +106,9 @@ set mcbtics default
 set mrtics default
 set nomttics
 set xtics border in scale 1,0.5 mirror norotate  autojustify
-set xtics  norangelimit autofreq 
+set xtics  norangelimit 0.5
 set ytics border in scale 1,0.5 mirror norotate  autojustify
-set ytics  norangelimit autofreq 
+set ytics  norangelimit logscale autofreq 
 set ztics border in scale 1,0.5 nomirror norotate  autojustify
 set ztics  norangelimit autofreq 
 unset x2tics
@@ -126,13 +130,13 @@ set xlabel "frequency [GHz]"
 set xlabel  font "" textcolor lt -1 norotate
 set x2label "" 
 set x2label  font "" textcolor lt -1 norotate
-set xrange [ * : * ] noreverse writeback
+set xrange [ 0.00000 : 4.00000 ] noreverse writeback
 set x2range [ * : * ] noreverse writeback
-set ylabel "average power spectrum [arb]" 
+set ylabel "power [arb.]" 
 set ylabel  font "" textcolor lt -1 rotate
 set y2label "" 
 set y2label  font "" textcolor lt -1 rotate
-set yrange [ * : * ] noreverse writeback
+set yrange [ 1.00000 : 10000.0 ] noreverse writeback
 set y2range [ * : * ] noreverse writeback
 set zlabel "" 
 set zlabel  font "" textcolor lt -1 norotate
@@ -143,6 +147,8 @@ set cbrange [ * : * ] noreverse writeback
 set rlabel "" 
 set rlabel  font "" textcolor lt -1 norotate
 set rrange [ * : * ] noreverse writeback
+unset logscale
+set logscale y 10
 unset jitter
 set zero 1e-08
 set lmargin  -1
@@ -163,46 +169,35 @@ set loadpath
 set fontpath 
 set psdir
 set fit brief errorvariables nocovariancevariables errorscaling prescale nowrap v5
+spectname(i) = sprintf('/nvme/hpl-CookieBox_testing/09_04_2020/30V_noAmp/330V_%iV_2180V/2020_09_04_16_27_03_powerspect.out',i)
 GNUTERM = "qt"
-spectfile = "./waveforms/01_18_2021/board3Tests/chan5/C1--Trace.logic_vector_spect.out"
-wavefile(i) = sprintf('./waveforms/01_18_2021/board3Tests/chan5/C1--Trace--%05i.out',i)
-## Last datafile plotted: "./waveforms/01_18_2021/board3Tests/chan5/C1--Trace.logic_vector_spect.out"
-wv = 10
-set term png size 600,400
-set output './figs/plotting.waveform_deriv.png'
-set lmargin screen .15
-set tmargin screen .9
-set bmargin screen .15
-set rmargin screen .9
-#set multiplot
-#set label 1 'a' at screen .02,.975 font 'Sans,24'
-#set label 2 'b' at screen .02,.475 font 'Sans,24'
-#set size 1,.5
-#set origin 0,0.0
-#set lmargin screen .15
-#set rmargin screen .9
-set xlabel 'time [ns]'
-set ylabel 'signal [arb. units]' offset 1,0
-set xrange [128:133]
-set key bottom left
-set mxtics 5
-plot 	wavefile(wv) u (.025*$0):1 title 'signal',\
-	wavefile(wv) u (.025*$0):4 lw 2 title 'logic'
-#set origin 0,0
-set term png size 600,400
-set output './figs/plotting.waveform_deriv_power.png'
-set logscale y 10 
-#set logscale x 2
-set xrange [0:4]
-set yrange [1:1e4]
-set xlabel 'frequency [GHz]'
-set ylabel 'power spectrum [arb. units]' offset 1,0
-set mxtics 4
-plot 	spectfile u (.002*$0):($1/1e3) title 'signal',\
-	spectfile u (.002*$0):($4/1e3) lw 2 title 'logic'
-#unset multiplot 
+spectname1780 = "/nvme/hpl-CookieBox_testing/09_04_2020/30V_noAmp/330V_1780V_2180V/2020_09_04_16_27_03_powerspect.out"
+spectname1830 = "/nvme/hpl-CookieBox_testing/09_04_2020/30V_noAmp/330V_1830V_2230V/2020_09_04_15_34_34_powerspect.out"
+spectname1880 = "/nvme/hpl-CookieBox_testing/09_04_2020/30V_noAmp/330V_1880V_2280V/2020_09_04_15_47_12_powerspect.out"
+spectname1930 = "/nvme/hpl-CookieBox_testing/09_04_2020/30V_noAmp/330V_1930V_2330V/2020_09_04_15_59_06_powerspect.out"
+spectname1980 = "/nvme/hpl-CookieBox_testing/09_04_2020/30V_noAmp/330V_1980V_2380V/2020_09_04_16_12_37_powerspect.out"
+ampspectname1630 = "/nvme/hpl-CookieBox_testing/09_04_2020/30V_withAmp/330V_1630V_2030V/2020_09_04_17_25_23_powerspect.out"
+ampspectname1680 = "/nvme/hpl-CookieBox_testing/09_04_2020/30V_withAmp/330V_1680V_2080V/2020_09_04_17_11_54_powerspect.out"
+ampspectname1730 = "/nvme/hpl-CookieBox_testing/09_04_2020/30V_withAmp/330V_1730V_2130V/2020_09_04_16_58_45_powerspect.out"
+ampspectname1780 = "/nvme/hpl-CookieBox_testing/09_04_2020/30V_withAmp/330V_1780V_2180V/2020_09_04_16_45_12_powerspect.out"
+ampspectname1830 = "/nvme/hpl-CookieBox_testing/09_04_2020/30V_withAmp/330V_1830V_2230V/2020_09_04_17_42_08_powerspect.out"
+## Last datafile plotted: "/nvme/hpl-CookieBox_testing/09_04_2020/30V_noAmp/330V_1930V_2330V/2020_09_04_15_59_06_powerspect.out"
+set term png size 600,600
+set output './figs/plotting.spectVgain.amps.png'
+plot 	ampspectname1630 title '1300 V',\
+	ampspectname1680 u 1:($2/3) title '1350 V',\
+	ampspectname1730 u 1:($2/15) title '1400 V',\
+	ampspectname1780 u 1:($2/60) title '1450 V',\
+	ampspectname1830 u 1:($2/200) title '1500 V',\
+	spectname1930 u 1:($2/35) title '1600 V, no Amp',\
+	
+set term png size 600,600
+set arrow 3 filled from .15,7e3 to .15,4e3
+set label 3 left at .17,7.5e3 "greater than 1600V adds\nonly low frequency power"
+set output './figs/plotting.spectVgain.straight.png'
+plot 	spectname1780 u 1:($2) title '1450 V',\
+	spectname1830 u 1:($2/1.75) title '1500 V',\
+	spectname1880 u 1:($2/8) title '1550 V',\
+	spectname1930 u 1:($2/25) title '1600 V',\
+	spectname1980 u 1:($2/70) title '1650 V'
 #    EOF
-	#wavefile(wv) u (.025*$0):2 title 'filt',\
-	#wavefile(wv) u (.025*$0):3 title 'deriv',\
-	#spectfile u (.002*$0):2 title 'filt',\
-	#spectfile u (.002*$0):3 title 'deriv',\

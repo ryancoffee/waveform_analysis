@@ -144,7 +144,7 @@ def main():
     if len(sys.argv)<2:
         print('syntax is: ./src/load_fromfile.py <datafile>')
         return
-    m = re.match('(.+)/(.+)$',sys.argv[1])
+    m = re.match('^(.+)/(.+)$',sys.argv[1])
     if m:
         path = m.group(1)
         fname = m.group(2)
