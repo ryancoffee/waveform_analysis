@@ -112,16 +112,20 @@ def main():
     nkern_dd = int(1./(tstep_ns * bwd_dd * 2))*2 + 1
     print('kernel lengths:\t%i\t%i\t%i'%(nkern,nkern_d,nkern_dd))
     t0=35
-    t0=10
+    t0=10 # describe how adjusting t0 is updating a memory location with DMA connetion with CPU...
     print('using as tstep = \t%f'%(tstep_ns))
     for batch in range(nbatches):
         print('Processing batch %i of %i instances'%(batch,ninstances))
         raw = np.fromfile('%s/%s'%(path,fname),count=sz*ninstances,offset=batch*ninstances*sizeoftrace,dtype=float)
         data = raw.reshape(ninstances,sz).T
-        if batch ==0:
+        if batch ==0: # indicates something needs setting
+            # describe how adjusting kerns is updating a memory location with DMA connetion with CPU...
+            ## setup state 
+            ## Try truncating with fixed point precision
             kern = [math.sin(math.pi*i/nkern) for i in range(nkern)]
             kern_d = [math.sin(2*math.pi*i/nkern_d)*math.sin(math.pi*i/nkern_d) for i in range(nkern_d)] 
             kern_dd = [math.sin(3*math.pi*i/nkern_dd)*math.sin(math.pi*i/nkern_dd) for i in range(nkern_dd)] 
+            ## potentially, we could also apply the kernels 
             times = np.array([tstep_ns * i for i in range(data.shape[0])])
             inds = np.where(times>t0+1)
             logtimes = np.zeros(times.shape[0])
