@@ -918,3 +918,339 @@ correlation matrix of the fit parameters:
 a               1.000 
 b              -0.999  1.000 
 c               0.998 -0.999  1.000 
+
+
+*******************************************************************************
+Wed Aug 26 14:28:45 2020
+
+
+FIT:    data read from file('.0.dlogic') using 1:2
+        format = x:z
+        x range restricted to [28.5831 : 29.8623]
+BREAK: No data to fit
+
+*******************************************************************************
+Wed Aug 26 14:29:19 2020
+
+
+FIT:    data read from file('.0.dlogic') u (exp($1)):2
+        format = x:z
+        x range restricted to [29.1500 : 29.2600]
+        #datapoints = 5
+        residuals are weighted equally (unit weight)
+
+function used for fitting: f(x)
+	f(x)=a+b*(x-29.2)
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   b            
+   0 1.3781588071e-03   0.00e+00  3.54e-02   -1.000000e+00
+   3 8.6691395328e-04  -6.53e-03  3.54e-05   -7.139944e-01
+
+After 3 iterations the fit converged.
+final sum of squares of residuals : 0.000866914
+rel. change during last iteration : -6.52642e-08
+
+degrees of freedom    (FIT_NDF)                        : 4
+rms of residuals      (FIT_STDFIT) = sqrt(WSSR/ndf)    : 0.0147217
+variance of residuals (reduced chisquare) = WSSR/ndf   : 0.000216728
+
+Final set of parameters            Asymptotic Standard Error
+=======================            ==========================
+b               = -0.713994        +/- 0.1862       (26.08%)
+
+
+*******************************************************************************
+Wed Aug 26 14:29:42 2020
+
+
+FIT:    data read from file('.0.dlogic') u (exp($1)):2
+        format = x:z
+        x range restricted to [29.1500 : 29.2600]
+        #datapoints = 5
+        residuals are weighted equally (unit weight)
+
+function used for fitting: f(x)
+	f(x)=a+b*(x-29.2)
+fitted parameters initialized with current variable values
+
+Warning: Initial value of parameter 'a' is zero.
+iter      chisq       delta/lim  lambda   a             b            
+   0 8.6691395328e-04   0.00e+00  1.78e-02    1.000000e-30  -7.139944e-01
+BREAK: Singular matrix in Invert_RtR
+
+*******************************************************************************
+Wed Aug 26 14:30:00 2020
+
+
+FIT:    data read from file('.0.dlogic') u (exp($1)):2
+        format = x:z
+        x range restricted to [29.1500 : 29.2600]
+        #datapoints = 5
+        residuals are weighted equally (unit weight)
+
+function used for fitting: f(x)
+	f(x)=a+b*(x-29.2)
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   x0            b            
+   0 8.6691713947e-04   0.00e+00  1.79e-02    1.000000e+00  -7.147084e-01
+BREAK: Singular matrix in Invert_RtR
+
+*******************************************************************************
+Wed Aug 26 14:30:31 2020
+
+
+FIT:    data read from file('.0.dlogic') u (exp($1)):2
+        format = x:z
+        x range restricted to [29.1500 : 29.2600]
+        #datapoints = 5
+        residuals are weighted equally (unit weight)
+
+function used for fitting: f(x)
+	f(x)=a+b*(x-29.2)
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   x0            b            
+   0 8.6691774572e-04   0.00e+00  1.79e-02    1.100000e+00  -7.147734e-01
+BREAK: Singular matrix in Invert_RtR
+
+*******************************************************************************
+Wed Aug 26 14:31:11 2020
+
+
+FIT:    data read from file('.0.dlogic') u (exp($1)):2
+        format = x:z
+        x range restricted to [29.1500 : 29.2600]
+        #datapoints = 5
+        residuals are weighted equally (unit weight)
+
+function used for fitting: f(x)
+	f(x) = a + b*x
+fitted parameters initialized with current variable values
+
+Warning: Initial value of parameter 'a' is zero.
+iter      chisq       delta/lim  lambda   a             b            
+   0 2.1808447480e+03   0.00e+00  1.48e+01    1.000000e-30  -7.147793e-01
+BREAK: Singular matrix in Invert_RtR
+
+*******************************************************************************
+Wed Aug 26 14:32:08 2020
+
+
+FIT:    data read from file('.0.dlogic') u (exp($1)):2
+        format = x:z
+        x range restricted to [29.1500 : 29.2600]
+        #datapoints = 5
+        residuals are weighted equally (unit weight)
+
+function used for fitting: f(x)
+	f(x) = a + b*x
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   a             b            
+   0 2.2758184549e-01   0.00e+00  2.91e+01    2.900000e+01  -1.000000e+00
+   7 8.6224588313e-06  -8.19e-09  2.91e-06    2.086174e+01  -7.139944e-01
+
+After 7 iterations the fit converged.
+final sum of squares of residuals : 8.62246e-06
+rel. change during last iteration : -8.19285e-14
+
+degrees of freedom    (FIT_NDF)                        : 3
+rms of residuals      (FIT_STDFIT) = sqrt(WSSR/ndf)    : 0.00169533
+variance of residuals (reduced chisquare) = WSSR/ndf   : 2.87415e-06
+
+Final set of parameters            Asymptotic Standard Error
+=======================            ==========================
+a               = 20.8617          +/- 0.6262       (3.002%)
+b               = -0.713994        +/- 0.02144      (3.003%)
+
+correlation matrix of the fit parameters:
+                a      b      
+a               1.000 
+b              -1.000  1.000 
+
+
+*******************************************************************************
+Wed Aug 26 14:35:55 2020
+
+
+FIT:    data read from file('.0.dlogic') u (exp($1)):2
+        format = x:z
+        x range restricted to [23.9800 : 24.0800]
+        #datapoints = 4
+        residuals are weighted equally (unit weight)
+
+function used for fitting: g(x)
+	g(x) = aa + bb*x
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   aa            bb           
+   0 3.8446736401e-03   0.00e+00  2.40e+01    2.400000e+01  -1.000000e+00
+   7 7.1442796949e-06  -1.49e-07  2.40e-06    3.020352e+01  -1.256823e+00
+
+After 7 iterations the fit converged.
+final sum of squares of residuals : 7.14428e-06
+rel. change during last iteration : -1.49162e-12
+
+degrees of freedom    (FIT_NDF)                        : 2
+rms of residuals      (FIT_STDFIT) = sqrt(WSSR/ndf)    : 0.00189001
+variance of residuals (reduced chisquare) = WSSR/ndf   : 3.57214e-06
+
+Final set of parameters            Asymptotic Standard Error
+=======================            ==========================
+aa              = 30.2035          +/- 0.8127       (2.691%)
+bb              = -1.25682         +/- 0.03381      (2.69%)
+
+correlation matrix of the fit parameters:
+                aa     bb     
+aa              1.000 
+bb             -1.000  1.000 
+
+
+*******************************************************************************
+Wed Aug 26 14:38:32 2020
+
+
+FIT:    data read from file('.0.dlogic') u (exp($1)):2
+        format = x:z
+        x range restricted to [31.6000 : 31.7100]
+        #datapoints = 5
+        residuals are weighted equally (unit weight)
+
+function used for fitting: h(x)
+	h(x) = aaa + bbb*x
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   aaa           bbb          
+   0 1.1809394969e-01   0.00e+00  3.16e+01    3.150000e+01  -1.000000e+00
+   7 9.1784731770e-08  -3.34e-06  3.16e-06    2.704664e+00  -8.544771e-02
+
+After 7 iterations the fit converged.
+final sum of squares of residuals : 9.17847e-08
+rel. change during last iteration : -3.33625e-11
+
+degrees of freedom    (FIT_NDF)                        : 3
+rms of residuals      (FIT_STDFIT) = sqrt(WSSR/ndf)    : 0.000174914
+variance of residuals (reduced chisquare) = WSSR/ndf   : 3.05949e-08
+
+Final set of parameters            Asymptotic Standard Error
+=======================            ==========================
+aaa             = 2.70466          +/- 0.07003      (2.589%)
+bbb             = -0.0854477       +/- 0.002213     (2.589%)
+
+correlation matrix of the fit parameters:
+                aaa    bbb    
+aaa             1.000 
+bbb            -1.000  1.000 
+
+
+*******************************************************************************
+Wed Aug 26 15:15:21 2020
+
+
+FIT:    data read from file('.0.dlogic') u (exp($1)):8
+        format = x:z
+        x range restricted to [27.1200 : 27.2100]
+        #datapoints = 4
+        residuals are weighted equally (unit weight)
+
+function used for fitting: f(x)
+	f(x) = a + b*x
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   a             b            
+   0 8.6721184570e+00   0.00e+00  2.01e+01    2.086174e+01  -7.139944e-01
+   6 2.8006009772e-05  -4.11e-02  2.01e-05    1.896516e+01  -6.983789e-01
+
+After 6 iterations the fit converged.
+final sum of squares of residuals : 2.8006e-05
+rel. change during last iteration : -4.10824e-07
+
+degrees of freedom    (FIT_NDF)                        : 2
+rms of residuals      (FIT_STDFIT) = sqrt(WSSR/ndf)    : 0.00374206
+variance of residuals (reduced chisquare) = WSSR/ndf   : 1.4003e-05
+
+Final set of parameters            Asymptotic Standard Error
+=======================            ==========================
+a               = 18.9652          +/- 1.818        (9.587%)
+b               = -0.698379        +/- 0.06694      (9.585%)
+
+correlation matrix of the fit parameters:
+                a      b      
+a               1.000 
+b              -1.000  1.000 
+
+
+*******************************************************************************
+Wed Aug 26 15:37:29 2020
+
+
+FIT:    data read from file('.0.dlogic') u (exp($1)):8
+        format = x:z
+        x range restricted to [27.7400 : 27.8400]
+        #datapoints = 4
+        residuals are weighted equally (unit weight)
+
+function used for fitting: g(x)
+	g(x) = aa + bb*x
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   aa            bb           
+   0 8.9062248909e+01   0.00e+00  3.26e+01    3.020352e+01  -1.256823e+00
+   7 1.2444778110e-05  -3.83e-08  3.26e-05    1.919427e+01  -6.908185e-01
+
+After 7 iterations the fit converged.
+final sum of squares of residuals : 1.24448e-05
+rel. change during last iteration : -3.83197e-13
+
+degrees of freedom    (FIT_NDF)                        : 2
+rms of residuals      (FIT_STDFIT) = sqrt(WSSR/ndf)    : 0.00249447
+variance of residuals (reduced chisquare) = WSSR/ndf   : 6.22239e-06
+
+Final set of parameters            Asymptotic Standard Error
+=======================            ==========================
+aa              = 19.1943          +/- 1.24         (6.46%)
+bb              = -0.690818        +/- 0.04462      (6.459%)
+
+correlation matrix of the fit parameters:
+                aa     bb     
+aa              1.000 
+bb             -1.000  1.000 
+
+
+*******************************************************************************
+Wed Aug 26 15:39:17 2020
+
+
+FIT:    data read from file('.0.dlogic') u (exp($1)):8
+        format = x:z
+        x range restricted to [29.5400 : 29.6400]
+        #datapoints = 4
+        residuals are weighted equally (unit weight)
+
+function used for fitting: h(x)
+	h(x) = aaa + bbb*x
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   aaa           bbb          
+   0 1.1763704772e-01   0.00e+00  2.62e+00    2.704664e+00  -8.544771e-02
+   7 4.2057487421e-06  -4.73e-06  2.62e-07    6.530858e+01  -2.206777e+00
+
+After 7 iterations the fit converged.
+final sum of squares of residuals : 4.20575e-06
+rel. change during last iteration : -4.72828e-11
+
+degrees of freedom    (FIT_NDF)                        : 2
+rms of residuals      (FIT_STDFIT) = sqrt(WSSR/ndf)    : 0.00145013
+variance of residuals (reduced chisquare) = WSSR/ndf   : 2.10287e-06
+
+Final set of parameters            Asymptotic Standard Error
+=======================            ==========================
+aaa             = 65.3086          +/- 0.7675       (1.175%)
+bbb             = -2.20678         +/- 0.02594      (1.176%)
+
+correlation matrix of the fit parameters:
+                aaa    bbb    
+aaa             1.000 
+bbb            -1.000  1.000 
