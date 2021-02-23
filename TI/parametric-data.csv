@@ -1,0 +1,100 @@
+﻿"Sample rate: 100 to 15000"
+"Resolution: 8 to 18"
+"Number of input channels: 1 to 2"
+"Analog input BW: 2001 to 8000"
+"=HYPERLINK(""http://www.ti.com/data-converters/adc-circuit/high-speed/products.html#p157max=100;15000&p84=8;18&p1028=1;2&p300=2001;8000"", ""View Selection Tool on TI.com"")"
+
+"NOTE: The table below does not have formatting applied."
+"Select the entire sheet (ctrl+A) and apply"
+"""Auto-fit column width"" to make all information visible"
+"(Format -> Column -> Autofit column width)"
+
+"Part number","Description","Ordering & quality","Sample rate
+(Max)
+(MSPS)","Resolution
+(Bits)","Number of input channels","Interface","Analog input BW
+(MHz)","Features","Rating","Input range
+(Vp-p)","Approx. price
+(US$)","Power consumption
+(Typ)
+(mW)","Architecture","SNR
+(dB)","ENOB
+(Bits)","SFDR
+(dB)","Operating temperature range
+(C)"
+"ADC12DJ3200QML-SP","12-bit, dual 3.2-GSPS or single 6.4-GSPS, RF-sampling analog-to-digital converter (ADC) - aerospace","=HYPERLINK(""https://www.ti.com/product/ADC12DJ3200QML-SP/samplebuy"",""Ordering & quality"")","3200,
+6400","12","2,
+1","JESD204B","7300","Ultra High Speed","Space","0.8"," --- ","3000","Folding Interpolating","57.2","8.9","76","-55 to 125,
+25 to 25"
+"ADC12DJ5200RF","RF-sampling 12-bit ADC with dual-channel 5.2 GSPS or single-channel 10.4 GSPS","=HYPERLINK(""https://www.ti.com/product/ADC12DJ5200RF/samplebuy"",""Ordering & quality"")","5200,
+10400","12","2,
+1","JESD204B,
+JESD204C","8000","Ultra High Speed","Catalog","0.8","2451.68 | 100u","4010","Folding Interpolating","56.7","9","78","-40 to 85"
+"AFE7422","Dual-channel RF-sampling AFE with 14-bit 9-GSPS DAC and 3-GSPS ADC with bypass mode","=HYPERLINK(""https://www.ti.com/product/AFE7422/samplebuy"",""Ordering & quality"")","3000","14","2","JESD204B","6000","High Performance","Catalog"," --- ","1099.91 | 100u","8200","Pipeline","60"," --- ","70","-40 to 85"
+"ADC12DL3200","12-bit, dual 3.2-GSPS or single 6.4-GSPS, RF-sampling analog-to-digital converter (LVDS interface)","=HYPERLINK(""https://www.ti.com/product/ADC12DL3200/samplebuy"",""Ordering & quality"")","3200,
+6400","12","2,
+1","DDR LVDS,
+Parallel LVDS","8000","Ultra High Speed","Catalog","0.8","2287.96 | 100u","3150","Folding Interpolating","57.9","9","78","-40 to 85"
+"ADC08DJ3200","8-Bit, Dual 3.2-GSPS or Single 6.4-GSPS, RF-Sampling Analog-to-Digital Converter (ADC)","=HYPERLINK(""https://www.ti.com/product/ADC08DJ3200/samplebuy"",""Ordering & quality"")","3200,
+6400","8","2,
+1","JESD204B","8000","Ultra High Speed","Catalog","0.8","788.92 | 100u","2800","Folding Interpolating","49.4","7.8","69","-40 to 85"
+"ADC12DJ2700","12-bit, dual 2.7-GSPS or single 5.4-GSPS, RF-sampling analog-to-digital converter (ADC)","=HYPERLINK(""https://www.ti.com/product/ADC12DJ2700/samplebuy"",""Ordering & quality"")","2700,
+5400","12","2,
+1","JESD204B","8000","Ultra High Speed","Catalog","0.8","1425.16 | 100u","2700","Folding Interpolating","57.7","9","75","-40 to 85"
+"ADC31RF80","14-Bit, 3-GSPS, RF-Sampling Wideband Receiver and Feedback IC","=HYPERLINK(""https://www.ti.com/product/ADC31RF80/samplebuy"",""Ordering & quality"")","3000","14","1","JESD204B","3200","Decimating Filter,
+Ultra High Speed","Catalog","1.35","553.96 | 100u","3200","Pipeline","61.4","9.8","71","-40 to 85"
+"ADC12DJ3200","12-bit, dual 3.2-GSPS or single 6.4-GSPS, RF-sampling analog-to-digital converter (ADC)","=HYPERLINK(""https://www.ti.com/product/ADC12DJ3200/samplebuy"",""Ordering & quality"")","3200,
+6400","12","2,
+1","JESD204B","8000","Ultra High Speed","Catalog","0.8","1689.16 | 100u","3000","Folding Interpolating","57.6","9","75","-40 to 85"
+"ADC32RF42","Dual-Channel, 14-Bit, 1.5-GSPS RF-Sampling Analog-to-Digital Converter (ADC)","=HYPERLINK(""https://www.ti.com/product/ADC32RF42/samplebuy"",""Ordering & quality"")","1500","14","2","JESD204B","3200","Ultra High Speed","Catalog","1.35","831.16 | 100u","4000","Pipeline","63","9.9","70","-40 to 85"
+"ADC32RF44","Dual-Channel, 14-Bit, 2.6-GSPS RF-Sampling Analog-to-Digital Converter (ADC)","=HYPERLINK(""https://www.ti.com/product/ADC32RF44/samplebuy"",""Ordering & quality"")","2600","14","2","JESD204B","3200","Ultra High Speed","Catalog","1.35","1318.24 | 100u","5820","Pipeline","63.1","10","79","-40 to 85"
+"ADC32RF45","Dual-Channel, 14-Bit, 3-GSPS RF-Sampling Analog-to-Digital Converter (ADC)","=HYPERLINK(""https://www.ti.com/product/ADC32RF45/samplebuy"",""Ordering & quality"")","3000","14","2","JESD204B","3200","Ultra High Speed","Catalog","1.35","1473.56 | 100u","6400","Pipeline","63","10","77","-40 to 85"
+"ADC12J1600","12-Bit, 1.6-GSPS, RF Sampling Analog-to-Digital Converter (ADC)","=HYPERLINK(""https://www.ti.com/product/ADC12J1600/samplebuy"",""Ordering & quality"")","1600","12","1","JESD204B","3200","Ultra High Speed","Catalog","0.725","579.22 | 100u","1600","Folding Interpolating","55.3","8.8","75","-40 to 85"
+"ADC12J2700","12-Bit, 2.7-GSPS, RF Sampling Analog-to-Digital Converter (ADC)","=HYPERLINK(""https://www.ti.com/product/ADC12J2700/samplebuy"",""Ordering & quality"")","2700","12","1","JESD204B","3200","Ultra High Speed","Catalog","0.725","901.82 | 100u","1800","Folding Interpolating","55.1","8.8","72","-40 to 85"
+"ADC12J4000","12-Bit, 4.0-GSPS, RF Sampling Analog-to-Digital Converter (ADC)","=HYPERLINK(""https://www.ti.com/product/ADC12J4000/samplebuy"",""Ordering & quality"")","4000","12","1","JESD204B","3200","Ultra High Speed","Catalog","0.725","1715.12 | 100u","2000","Folding Interpolating","55","8.8","71","-40 to 85"
+"ADC12D1600RF","12-bit, dual 1.6-GSPS or single 3.2-GSPS, RF-sampling analog-to-digital converter (ADC)","=HYPERLINK(""https://www.ti.com/product/ADC12D1600RF/samplebuy"",""Ordering & quality"")","1600,
+3200","12","2,
+1","Parallel LVDS","2700","Ultra High Speed","Catalog","0.8","1686.08 | 100u","3880","Folding Interpolating","59","9.4","75","-40 to 85"
+"ADC12D1800RF","12-Bit, Dual 1.8GSPS or Single 3.6GSPS, RF-Sampling Analog-to-Digital Converter (ADC)","=HYPERLINK(""https://www.ti.com/product/ADC12D1800RF/samplebuy"",""Ordering & quality"")","1800,
+3600","12","2,
+1","Parallel LVDS","2700","Ultra High Speed","Catalog","0.8","2494.80 | 100u","4400","Folding Interpolating","58.6","9.3","71.7","-40 to 85"
+"ADC12D500RF","12-Bit, Dual 500-MSPS or Single 1.0-GSPS, RF Sampling Analog-to-Digital Converter (ADC)","=HYPERLINK(""https://www.ti.com/product/ADC12D500RF/samplebuy"",""Ordering & quality"")","500,
+1000","12","2,
+1","Parallel LVDS","2700","Low Power","Catalog","0.8","276.32 | 100u","2020","Folding Interpolating","60.4","9.7","74.3","-40 to 85"
+"ADC12D800RF","12-Bit, Dual 800-MSPS or Single 1.6-GSPS, RF Sampling Analog-to-Digital Converter (ADC)","=HYPERLINK(""https://www.ti.com/product/ADC12D800RF/samplebuy"",""Ordering & quality"")","800,
+1600","12","2,
+1","Parallel LVDS","2700","Low Power","Catalog","0.8","770.53 | 100u","2500","Folding Interpolating","60.4","9.7","74.3","-40 to 85"
+"ADS5400-SP","12-bit, 1.0-GSPS Analog-to-Digital Converter (ADC)","=HYPERLINK(""https://www.ti.com/product/ADS5400-SP/samplebuy"",""Ordering & quality"")","1000","12","1","Parallel LVDS","2150","Ultra High Speed","Space","2"," --- ","2200","Pipeline","58.5","9.55","77.9","-55 to 125"
+"ADC12D1800","12-bit, dual 1.8GSPS or single 3.6GSPS analog-to-digital converter (ADC)","=HYPERLINK(""https://www.ti.com/product/ADC12D1800/samplebuy"",""Ordering & quality"")","1800,
+3600","12","2,
+1","Parallel LVDS","2800","Ultra High Speed","Catalog","0.8","1690.48 | 100u","4180","Folding Interpolating","58.6","9.4","73","-40 to 85"
+"ADC12D1600","12-bit, dual 1.6-GSPS or single 3.2-GSPS analog-to-digital converter (ADC)","=HYPERLINK(""https://www.ti.com/product/ADC12D1600/samplebuy"",""Ordering & quality"")","1600,
+3200","12","2,
+1","Parallel LVDS","2800","Ultra High Speed","Catalog","0.8","1403.60 | 100u","3880","Folding Interpolating","58.5","9.4","71","-40 to 85"
+"ADS5400","12-bit, 1.0-GSPS Analog-to-Digital Converter (ADC)","=HYPERLINK(""https://www.ti.com/product/ADS5400/samplebuy"",""Ordering & quality"")","1000","12","1","Parallel LVDS","2150","Ultra High Speed","Catalog","2","950.40 | 100u","2200","Pipeline","58.5","9.42","80.4","-40 to 85"
+"ADC10D1500","10-Bit, Dual 1.5-GSPS or Single 3.0-GSPS Analog-to-Digital Converter (ADC)","=HYPERLINK(""https://www.ti.com/product/ADC10D1500/samplebuy"",""Ordering & quality"")","1500,
+3000","10","2,
+1","Parallel LVDS","2800","Ultra High Speed","Catalog","0.8","1522.40 | 100u","3140","Folding Interpolating","57","9.1","70","-40 to 85"
+"ADC12D1000","12-Bit, Dual 1.0-GSPS or Single 2.0-GSPS Analog-to-Digital Converter (ADC)","=HYPERLINK(""https://www.ti.com/product/ADC12D1000/samplebuy"",""Ordering & quality"")","1000,
+2000","12","2,
+1","Parallel LVDS","2800","Ultra High Speed","Catalog","0.8","670.56 | 100u","3380","Folding Interpolating","60.2","9.6","71","-40 to 85"
+"ADS54RF63","12-Bit, 550-MSPS, RF Sampling Analog-to-Digital Converter (ADC)","=HYPERLINK(""https://www.ti.com/product/ADS54RF63/samplebuy"",""Ordering & quality"")","550","12","1","Parallel LVDS","2300","High Performance","Catalog","2.2","192.72 | 1ku","2250","Pipeline","65.4","10.4","90","-40 to 85"
+"ADC10D1000QML-SP","Low Power, 10-Bit, Dual 1.0 GSPS or Single 2.0 GSPS A/D Converter","=HYPERLINK(""https://www.ti.com/product/ADC10D1000QML-SP/samplebuy"",""Ordering & quality"")","1000,
+2000","10","2,
+1","Parallel LVDS","2800","Ultra High Speed","Space","0.8"," --- ","2770","Folding Interpolating","56.8","9","67.6","-55 to 125"
+"ADC10D1000","10-Bit, Dual 1.0-GSPS or Single 2.0-GSPS Analog-to-Digital Converter (ADC)","=HYPERLINK(""https://www.ti.com/product/ADC10D1000/samplebuy"",""Ordering & quality"")","1000,
+2000","10","2,
+1","Parallel LVDS","2800","Ultra High Speed","Catalog","0.8","1209.82 | 100u","2770","Folding Interpolating","57","9.1","70","-40 to 85"
+"ADC083000","8-Bit, 3.0-GSPS Analog-to-Digital Converter (ADC)","=HYPERLINK(""https://www.ti.com/product/ADC083000/samplebuy"",""Ordering & quality"")","3000","8","1","Parallel LVDS","3000","Ultra High Speed","Catalog","0.82","726.18 | 100u","1900","Folding Interpolating","45.4","7.2","57","-40 to 85"
+"ADC08B3000","8-Bit, 3.0-GSPS Analog-to-Digital Converter (ADC) with 4K Buffer","=HYPERLINK(""https://www.ti.com/product/ADC08B3000/samplebuy"",""Ordering & quality"")","3000","8","1","Parallel CMOS","3000","Ultra High Speed","Catalog","0.81","186.56 | 100u","1600","Folding Interpolating","45.3","7.2","55.4","-40 to 85"
+"ADC12D1000RF","12-Bit, Dual 1.0-GSPS or Single 2.0-GSPS, RF Sampling Analog-to-Digital Converter (ADC)","=HYPERLINK(""https://www.ti.com/product/ADC12D1000RF/samplebuy"",""Ordering & quality"")","1000,
+2000","12","2,
+1","Parallel LVDS","2700","Ultra High Speed","Catalog","0.8","1108.76 | 100u","3510","Folding Interpolating","60.1","9.6","75","-40 to 85"
+"ADC12D1600QML-SP","12-bit, dual 1.6-GSPS or single 3.2-GSPS, RF-sampling analog-to-digital converter (ADC) - aerospace","=HYPERLINK(""https://www.ti.com/product/ADC12D1600QML-SP/samplebuy"",""Ordering & quality"")","1600,
+3200","12","2,
+1","Parallel LVDS","2400","Ultra High Speed","Space","0.8"," --- ","3880","Folding Interpolating","58.2","9.3","67.3","25 to 25,
+-55 to 125"
+"ADC12D1620QML-SP","12-bit, dual 1.6-GSPS or single 3.2-GSPS, RF-sampling ADC with improved ENOB – aerospace","=HYPERLINK(""https://www.ti.com/product/ADC12D1620QML-SP/samplebuy"",""Ordering & quality"")","1600,
+3200","12","2,
+1","Parallel LVDS","2400","Ultra High Speed","Space","0.8"," --- ","3880","Folding Interpolating","59.8","9.5","67.4","-55 to 125,
+25 to 25"

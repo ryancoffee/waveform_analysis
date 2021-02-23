@@ -70,13 +70,16 @@ def getacFilter(data,FREQ,cut = 0.2):
 
 def main():
     if len(sys.argv[1])==1:
-        print('syntax is: ./src/loadbinary.py <path/fname_front> <nwaves> <negation(1,-1)> <nrolls> <overlap>')
+        print('syntax is: ./src/loadbinary.py <path/fname_front> <nstart> <nwaves> <negation(1,-1)> <nrolls> <overlap>')
     path = 'data_fs'
     if (len(sys.argv)>1):
         path = sys.argv[1]
+    nstart = 0
     nwaves = 10
     if (len(sys.argv)>2):
-        nwaves = int(sys.argv[2])
+        nstart = int(sys.argv[2])
+    if (len(sys.argv)>3):
+        nwaves = int(sys.argv[3])
     wv = int(0)
     fname = '%s%05i.trc'%(path,wv)
     hname = '%s.hist'%(path)
@@ -84,29 +87,32 @@ def main():
     print(nvals,times[2]-times[1])
 
     negation = 1 # set to 1 for positive going signals, -1 for negative going
-    if (len(sys.argv)>3):
-        negation = int(sys.argv[3])
+    if (len(sys.argv)>4):
+        negation = int(sys.argv[4])
     
     nrolls=20
     overlap=2
-    if (len(sys.argv)>4):
-        nrolls = int(sys.argv[4])
     if (len(sys.argv)>5):
-        overlap = int(sys.argv[5])
+        nrolls = int(sys.argv[5])
+    if (len(sys.argv)>6):
+        overlap = int(sys.argv[6])
 
     parseddata = np.zeros(nvals,dtype=np.float32)
     data = np.zeros((nvals//nrolls,nrolls*overlap),dtype=np.int16)
     sz = data.shape[0]
     window = 0.5*(1.+np.sin(np.arange(sz)*np.pi/sz))
     outdata = np.zeros(nvals//nrolls,dtype=np.float32)
-    FREQ = np.fft.fftfreq(data.shape[0],times[2]-times[1]) 
+    dt = times[1]-times[0]
+    FREQ = np.fft.fftfreq(data.shape[0],dt) 
     print(data.shape)
+    print(FREQ[:5])
+    print('Frequency step in Hz: %.3f'%(1./data.shape[0]/dt))
     W = getWeinerFilter(data,FREQ,cut = 4e3,noise = 0.01)
     W_lowpass = getWeinerFilter(data,FREQ,cut = 1.0,noise = 0.0001)
     AC = getacFilter(data,FREQ,cut = 0.05)
 
 
-    for wv in range(nwaves):
+    for wv in range(nstart,nstart+nwaves):
         fname = '%s%05i.trc'%(path,wv)
         if not os.path.exists(fname):
             continue
@@ -116,7 +122,7 @@ def main():
             data[:,i] = fulldata[:sz]*window
         Y = np.abs(np.fft.fft(negation*data,axis=0)).real
         outdata = np.column_stack((outdata,Y))
-        if wv%5 == 0:
+        if wv%1 == 0:
             oname = '%s%05i.powerspec'%(path,wv)
             headstring = 'powerspec'
             np.savetxt(oname,Y,fmt= '%f',header=headstring)
