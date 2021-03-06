@@ -67,7 +67,7 @@ def zeroFitRoot(lt,d,thresh=1.):
 
         x0 = np.mean(x)
         theta = np.linalg.pinv( mypoly(np.array(x).astype(float),order=order) ).dot(np.array(y).astype(float))
-        for j in range(3):
+        for j in range(order+1):
             X0 = np.array([np.power(x0,int(i)) for i in range(order+1)])
             x0 -= theta.dot(X0)/theta.dot([i*X0[(i+1)%(order+1)] for i in range(order+1)]) # this seems like maybe it should be wrong
         tofs += [x0]
