@@ -2,15 +2,15 @@
 #
 #    
 #    	G N U P L O T
-#    	Version 5.2 patchlevel 6    last modified 2019-01-01 
+#    	Version 5.2 patchlevel 8    last modified 2019-12-01 
 #    
-#    	Copyright (C) 1986-1993, 1998, 2004, 2007-2018
+#    	Copyright (C) 1986-1993, 1998, 2004, 2007-2019
 #    	Thomas Williams, Colin Kelley and many others
 #    
 #    	gnuplot home:     http://www.gnuplot.info
 #    	faq, bugs, etc:   type "help FAQ"
 #    	immediate help:   type "help"  (plot window: hit 'h')
-# set terminal x11  nopersist enhanced
+# set terminal qt 0 font "Sans,9"
 # set output
 unset clip points
 set clip one
@@ -44,7 +44,7 @@ unset raxis
 set theta counterclockwise right
 set style parallel front  lt black linewidth 2.000 dashtype solid
 set key title "" center
-set key fixed right top vertical Right noreverse enhanced autotitle nobox
+set key fixed left top vertical Right noreverse enhanced autotitle nobox
 set key noinvert samplen 4 spacing 1 width 0 height 0 
 set key maxcolumns 0 maxrows 0
 set key noopaque
@@ -65,7 +65,8 @@ unset parametric
 unset decimalsign
 unset micro
 unset minussign
-set view map scale 1
+set view 60, 30, 1, 1
+set view azimuth 0
 set rgbmax 255
 set samples 100, 100
 set isosamples 10, 10
@@ -77,12 +78,12 @@ set datafile separator whitespace
 unset hidden3d
 set cntrparam order 4
 set cntrparam linear
-set cntrparam levels auto 5 unsorted
-set cntrparam firstlinetype 0
+set cntrparam levels 5
+set cntrparam levels auto
+set cntrparam firstlinetype 0 unsorted
 set cntrparam points 5
 set size ratio 0 1,1
 set origin 0,0
-set style data image
 set style function lines
 unset xzeroaxis
 unset yzeroaxis
@@ -108,30 +109,30 @@ set ztics  norangelimit autofreq
 unset x2tics
 unset y2tics
 set cbtics border in scale 1,0.5 mirror norotate  autojustify
-set cbtics  norangelimit logscale autofreq 
+set cbtics  norangelimit autofreq 
 set rtics axis in scale 1,0.5 nomirror norotate  autojustify
 set rtics  norangelimit autofreq 
 unset ttics
 set title "" 
-set title  font "" norotate
+set title  font "" textcolor lt -1 norotate
 set timestamp bottom 
 set timestamp "" 
-set timestamp  font "" norotate
+set timestamp  font "" textcolor lt -1 norotate
 set trange [ * : * ] noreverse nowriteback
 set urange [ * : * ] noreverse nowriteback
 set vrange [ * : * ] noreverse nowriteback
-set xlabel "time [arb]" 
+set xlabel "" 
 set xlabel  font "" textcolor lt -1 norotate
 set x2label "" 
 set x2label  font "" textcolor lt -1 norotate
-set xrange [ * : * ] noreverse writeback
-set x2range [ * : * ] noreverse writeback
-set ylabel "frequency [Hz]" 
+set xrange [ -0.300000 : 0.00000 ] noreverse writeback
+set x2range [ -1.17235 : 0.166773 ] noreverse writeback
+set ylabel "" 
 set ylabel  font "" textcolor lt -1 rotate
 set y2label "" 
 set y2label  font "" textcolor lt -1 rotate
-set yrange [ 50.0000 : 3000.00 ] noreverse nowriteback
-set y2range [ * : * ] noreverse writeback
+set yrange [ * : * ] noreverse writeback
+set y2range [ -43.3520 : 922.902 ] noreverse writeback
 set zlabel "" 
 set zlabel  font "" textcolor lt -1 norotate
 set zrange [ * : * ] noreverse writeback
@@ -142,7 +143,6 @@ set rlabel ""
 set rlabel  font "" textcolor lt -1 norotate
 set rrange [ * : * ] noreverse writeback
 unset logscale
-set logscale cb 10
 unset jitter
 set zero 1e-08
 set lmargin  -1
@@ -163,12 +163,34 @@ set loadpath
 set fontpath 
 set psdir
 set fit brief errorvariables nocovariancevariables errorscaling prescale nowrap v5
-file(x) = sprintf('/nvme/correlation_audio_data/banjo/C4--cd-C1--%05i.powerspec',x)
-chirpsfile(x) = sprintf('/nvme/correlation_audio_data/chirpsandclaps/C4--cd-C1--%05i.powerspec',x)
+ufile(i) = sprintf('./waveforms/09_04_2020/30V_noAmp/330V_1930V_2330V/2020_09_04_15_59_06_logic_compare_upscale%i.hist',i)
+g(x)=a*exp(-((x-x0)/w)**2)
 GNUTERM = "qt"
-set term png size 1200,1200
-set xlabel 'time [arb]'
-file = "/nvme/correlation_audio_data/banjo/C4--cd-C1--00010.powerspec"
-## Last datafile plotted: "/nvme/correlation_audio_data/chirpsandclaps/C4--cd-C1--00002.powerspec"
-splot chirpsfile(2) mat u 1:($2*10):3
+x = -0.2
+a = 865.897852848411
+x0 = -0.108201419269275
+w = 0.0369797860275759
+FIT_CONVERGED = 1
+FIT_NDF = 7
+FIT_STDFIT = 75.8192128265127
+FIT_WSSR = 40239.8712354242
+FIT_P = 0.0
+FIT_NITER = 7
+a_err = 60.9897299700014
+w_err = 0.00300900248975369
+x0_err = 0.00212711725266019
+## Last datafile plotted: "waveforms/09_04_2020/30V_noAmp/330V_1930V_2330V/2020_09_04_15_59_06_logic_compare_upscale8.hist"
+set term png size 600,400
+set output './figs/plotting.upscale.png'
+set style data impulses
+os=.005
+set xlabel 'edge difference [ns]'
+set ylabel 'histogram [counts]' offset 1,0
+plot 	ufile(2) u ($1-os):2 lw 4 title '2x oversampling',\
+	ufile(4) u 1:2 lw 4 title '4x',\
+	ufile(8) u ($1+os):2 lw 4 title '8x',\
+	a=619.208 w=0.0608004 x0=-0.144808-os g(x) lc 1 title '{/Symbol s}=0.061',\
+	a=917.986 w=0.038639 x0=-0.0949601 g(x) lc 2 title '{/Symbol s}=0.039',\
+	a=1070.82 w=0.0328917 x0=-0.0788116+os g(x) lc 3 title '{/Symbol s}=0.033'
+## fit [-.2:0] g(x) ufile(3) via a,w,x0
 #    EOF
