@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+import os.path
 import numpy as np
 from scipy import fft
 import re
@@ -77,6 +78,7 @@ def pairedges(edges1,edges2):
 def run_upscale(upscale,params):
     out = []
     path = params['path']
+    outpath = params['outpath']
     fname = params['fname']
     sz = params['sz']
     sizeoftrace = params['sizeoftrace']
@@ -86,11 +88,22 @@ def run_upscale(upscale,params):
     #thresh = hard to catch for upscale=1; -40 for upscale=2; -20 for upscale=3; -10 for upscale=4;-5 for upscale=6;-2.5 for upscale=8
     tstep_under_ns = tstep_ns*6/upscale ## acutal Abaco sampling will be 6 GSps, but for this we simply take every 6th step of the waveform.
 
+    hbins = np.arange(-10,10,0.025)
+    tofbins = np.arange(0,500,0.05)
+
     upthresh = {1:-40,2:-40,3:-20,4:-10,6:-5,8:-2.5,10:-1.5}
 
-    for batch in range(nbatches):
+
+    lastpass = False
+    batch = 0
+    while not lastpass:
         print('Processing batch %i of %i instances for upscale %.2f'%(batch,ninstances,upscale))
         raw = np.fromfile('%s/%s'%(path,fname),count=sz*ninstances,offset=batch*ninstances*sizeoftrace,dtype=float)
+        if (raw.shape[0] < ninstances*sz):
+            ninstances = raw.shape[0]//sz
+            lastpass = True
+        if nbatches < 32 and batch == 31:
+            lastpass = True
         data = 1e3*raw.reshape(ninstances,sz).T # data in millivolts
         d = np.row_stack((data,np.flipud(data)))
         d_ = np.row_stack((data[::6,:],np.flipud(data[::6,:])))
@@ -107,7 +120,6 @@ def run_upscale(upscale,params):
         DC_[frq_.shape[0]:,:] = 0
         DC_[:frq_.shape[0],:] *= filt_
 
-        if batch%10==0: np.savetxt('%s/processed/%s_b%i_sample.dat'%(path,fname,batch),d,fmt='%.3f')
         DC_up = np.zeros((DC_.shape[0]*upscale,DC_.shape[1]),dtype=float)
         DC_up[:DC_.shape[0],:] = DC_
         dcc = fft.idct(DC,axis=0)
@@ -119,38 +131,49 @@ def run_upscale(upscale,params):
         logic = (dsc*dcc)[:DC.shape[0]//2,:]
         #logic_ = (dsc_*dcc_)[:frq_.shape[0]//2,:]
         logic_up = (dsc_up*dcc_up)[:DC_.shape[0]//2*upscale,:]
-        if batch%10==0:
-            np.savetxt('%s/processed/%s_b%i_dct.dat'%(path,fname,batch),DC,fmt='%.3f')
-            np.savetxt('%s/processed/%s_b%i_idct.dat'%(path,fname,batch),dcc,fmt='%.3f')
-            np.savetxt('%s/processed/%s_b%i_idst.dat'%(path,fname,batch),dsc,fmt='%.3f')
-            np.savetxt('%s/processed/%s_b%i_logic.dat'%(path,fname,batch),logic,fmt='%.3f')
-            #np.savetxt('%s/processed/%s_b%i_logic_.dat'%(path,fname,batch),logic_,fmt='%.3f')
-            np.savetxt('%s/processed/%s_b%i_logic_up.dat'%(path,fname,batch),logic_up,fmt='%.3f')
-        f = open('%s/processed/%s_b%i_logic_edges.dat'%(path,fname,batch),'w')
-        f_up = open('%s/processed/%s_b%i_logic_up_edges.dat'%(path,fname,batch),'w')
+        if batch%16==0:
+            np.savetxt('%s/%s_b%i_sample.dat'%(outpath,fname,batch),d,fmt='%.3f')
+            np.savetxt('%s/%s_b%i_dct.dat'%(outpath,fname,batch),DC,fmt='%.3f')
+            np.savetxt('%s/%s_b%i_idct.dat'%(outpath,fname,batch),dcc,fmt='%.3f')
+            np.savetxt('%s/%s_b%i_idst.dat'%(outpath,fname,batch),dsc,fmt='%.3f')
+            np.savetxt('%s/%s_b%i_logic.dat'%(outpath,fname,batch),logic,fmt='%.3f')
+            #np.savetxt('%s/%s_b%i_logic_.dat'%(outpath,fname,batch),logic_,fmt='%.3f')
+            np.savetxt('%s/%s_b%i_logic_up.dat'%(outpath,fname,batch),logic_up,fmt='%.3f')
+        #f = open('%s/%s_b%i_logic_edges.dat'%(outpath,fname,batch),'w')
+        #f_up = open('%s/%s_b%i_logic_up_edges.dat'%(outpath,fname,batch),'w')
         for i in range(ninstances):
             logic_edges = scanedges(logic[:,i],-100)
-            line = '\t'.join(['%.3f'%(e) for e in logic_edges]) + '\n'
-            f.write(line)
+            #line = '\t'.join(['%.3f'%(e) for e in logic_edges]) + '\n'
+            #f.write(line)
             #print(len(logic_edges),line)
             logic_up_edges = scanedges(logic_up[:,i],upthresh[upscale])
-            line = '\t'.join(['%.3f'%(4*e/6.) for e in logic_up_edges]) + '\n'
-            f_up.write(line)
+            #line = '\t'.join(['%.3f'%(4*e/6.) for e in logic_up_edges]) + '\n'
+            #f_up.write(line)
             out += pairedges([tstep_ns*e for e in logic_edges]
                     ,[tstep_under_ns*e for e in logic_up_edges])
-        f.close()
-        f_up.close()
-        if batch%10==0: 
-            np.savetxt('%s/processed/%s_logic_compare.out'%(path,fname),np.column_stack(out),fmt='%.3f')
-            f = open('%s/processed/%s_logic_compare_upscale%i.dat'%(path,fname,upscale),'w')
-            _ = [f.write('%.4f\t%.4f\n'%(p[0],p[1])) for p in out]
-            f.close()
-            hbins = np.arange(-10,10,0.02)
+        #f.close()
+        #f_up.close()
+        if batch%16==0: 
+            #np.savetxt('%s/%s_logic_compare.out'%(outpath,fname),np.column_stack(out),fmt='%.3f')
+            #f = open('%s/%s_logic_compare_upscale%i.dat'%(outpath,fname,upscale),'w')
+            #_ = [f.write('%.4f\t%.4f\n'%(p[0],p[1])) for p in out]
+            #f.close()
             h = np.histogram(np.array(out)[:,1]-np.array(out)[:,0],hbins)[0]
-            np.savetxt('%s/processed/%s_logic_compare_upscale%i.hist'%(path,fname,upscale),np.column_stack((hbins[:-1],h)),fmt='%.3f')
+            np.savetxt('%s/%s_logic_difference_upscale%i.hist'%(outpath,fname,upscale),np.column_stack((hbins[:-1],h)),fmt='%.3f')
+
+            h0 = np.histogram(np.array(out)[:,0],tofbins)[0]
+            h1 = np.histogram(np.array(out)[:,1],tofbins)[0]
+            np.savetxt('%s/%s_logic_compare_upscale%i.hist'%(outpath,fname,upscale),np.column_stack((tofbins[:-1],h0,h1)),fmt='%.3f')
+
+        batch += 1
+
+    tofbins = np.arange(0,500,0.05)
+    h0 = np.histogram(np.array(out)[:,0],tofbins)[0]
+    h1 = np.histogram(np.array(out)[:,1],tofbins)[0]
+    np.savetxt('%s/%s_logic_compare_upscale%i.hist'%(outpath,fname,upscale),np.column_stack((tofbins[:-1],h0,h1)),fmt='%.3f')
     hbins = np.arange(-10,10,0.02)
     h = np.histogram(np.array(out)[:,1]-np.array(out)[:,0],hbins)[0]
-    np.savetxt('%s/processed/%s_logic_compare_upscale%i.hist'%(path,fname,upscale),np.column_stack((hbins[:-1],h)),fmt='%.3f')
+    np.savetxt('%s/%s_logic_difference_upscale%i.hist'%(outpath,fname,upscale),np.column_stack((hbins[:-1],h)),fmt='%.3f')
 
     return
 
@@ -174,18 +197,23 @@ def main():
         return
 
 
+    outpath = '%s/processed'%(path)
+    if not os.path.isdir(outpath):
+        os.mkdir(outpath,mode=int(7*2**6 + 7*2**3 + 5)) # the mode is a binary rep int for rwxrwxrwx... so 777 really looks like 7*2**6 + 7*2**3 + 7 if you want all bits '1'
     sizeoftrace = getAndreiSize('%s/%s_HEADER.txt'%(path,fname))
     sz = sizeoftrace//8
-    ninstances = 64
-    nbatches = 64 
+    ninstances = 256
+    nbatches = 128 
 
 
     num_cores = multiprocessing.cpu_count()
     print(num_cores)
-    upscalelist = [1,2,3,4,6,8,10]
-    #upscalelist = tqdm([1,2,3,4,6,8,10])
+    #upscalelist = [1,2,3,4,6,8,10]
+    #upscalelist = tqdm([2,4,6,8])
+    upscalelist = [2,4,6,8]
 
     params = {  'path':path,
+                'outpath':outpath,
                 'fname':fname,
                 'sz':sz,
                 'sizeoftrace':sizeoftrace,
