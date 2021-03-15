@@ -168,31 +168,39 @@ spectfile = "./waveforms/01_18_2021/board3Tests/chan5/C1--Trace.logic_vector_spe
 wavefile(i) = sprintf('./waveforms/01_18_2021/board3Tests/chan5/C1--Trace--%05i.out',i)
 ## Last datafile plotted: "./waveforms/01_18_2021/board3Tests/chan5/C1--Trace.logic_vector_spect.out"
 wv = 10
-set term png size 800,800
-set output './figs/plotting.waveformspect.png'
-set multiplot
-set label 1 'a' at screen .02,.975 font 'Sans,24'
-set label 2 'b' at screen .02,.475 font 'Sans,24'
-set size 1,.5
-set origin 0,0.5
+set term png size 600,400
+set output './figs/plotting.waveform_deriv.png'
 set lmargin screen .15
+set tmargin screen .9
+set bmargin screen .15
 set rmargin screen .9
+#set multiplot
+#set label 1 'a' at screen .02,.975 font 'Sans,24'
+#set label 2 'b' at screen .02,.475 font 'Sans,24'
+#set size 1,.5
+#set origin 0,0.0
+#set lmargin screen .15
+#set rmargin screen .9
 set xlabel 'time [ns]'
-set ylabel 'signal [arb. units]'
+set ylabel 'signal [arb. units]' offset 1,0
 set xrange [128:133]
 set key bottom left
-plot 	wavefile(wv) u (.025*$0):1 title 'sig',\
+set mxtics 5
+plot 	wavefile(wv) u (.025*$0):1 title 'signal',\
 	wavefile(wv) u (.025*$0):4 lw 2 title 'logic'
-set origin 0,0
+#set origin 0,0
+set term png size 600,400
+set output './figs/plotting.waveform_deriv_power.png'
 set logscale y 10 
-set logscale x 2
-set xrange [.125:8]
-set yrange [1e3:1e7]
+#set logscale x 2
+set xrange [0:4]
+set yrange [1:1e4]
 set xlabel 'frequency [GHz]'
-set ylabel 'power spectrum [arb. units]'
-plot 	spectfile u (.002*$0):1 title 'sig',\
-	spectfile u (.002*$0):4 lw 2 title 'logic'
-unset multiplot 
+set ylabel 'power spectrum [arb. units]' offset 1,0
+set mxtics 4
+plot 	spectfile u (.002*$0):($1/1e3) title 'signal',\
+	spectfile u (.002*$0):($4/1e3) lw 2 title 'logic'
+#unset multiplot 
 #    EOF
 	#wavefile(wv) u (.025*$0):2 title 'filt',\
 	#wavefile(wv) u (.025*$0):3 title 'deriv',\

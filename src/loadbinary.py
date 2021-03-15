@@ -140,7 +140,7 @@ def main():
 
     data = np.zeros(nvals,dtype=np.int16)
     FREQ = np.fft.fftfreq(data.shape[0],tstep_ns) ## in nanoseconds #1./40.) # 1/sampling rate in GHz
-    W = getWeinerFilter(data,FREQ,cut = 3.0,noise = 0.1)
+    W = getWeinerFilter(data,FREQ,cut = 3.0,noise = 0.0001)
     W_lowpass = getWeinerFilter(data,FREQ,cut = 1.0,noise = 0.0001)
     AC = getacFilter(data,FREQ,cut = 0.05)
     w_ac_filter = np.roll(np.fft.ifft(W*AC).real,nroll)
