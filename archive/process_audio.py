@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
 import numpy as np
-import lecroyparser 
 import h5py
 import sys
 import os
@@ -28,14 +27,6 @@ def zeroCrossings(data,thresh):
             if i == sz-1: break
     return tofs 
 
-def getHeaderBytesTimes(fname):
-    data = lecroyparser.ScopeData(fname)
-    nvals = len(data.y)
-    f = open(fname,'br')
-    buf = f.read()
-    f.close()
-    nseek = int(len(buf) - 2*nvals)
-    return (nseek,nvals,data.x)
 
 def loadArrayBytes_int8(fname,nseek,nvals):
     f = open(fname,'br')

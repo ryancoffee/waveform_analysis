@@ -8,40 +8,16 @@ import os
 import re
 import math
 
-def sigmoid(x,c,w):
-    return 1./(1.+np.exp(-(x-c)/w))
+def txts2list(fnames:List):
+    data = []
+    for fname in fnames:
+        data += [ txt2array(os.path.join(fname)) ]
+    return data
 
-def zeroCrossings(data,thresh,tstep = 1.):
-    tofs = []
-    i = int(0)
-    sz = data.shape[0]
-    while i < data.shape[0]-1:
-        while data[i] < thresh:
-            i += 1
-            if i == sz-1: break
-        if i == sz-1: break
-        while data[i] > 0:
-            i += 1
-            if i == sz-1: break
-        tofs = tofs + [(1./float(data[i]-data[i-1])*data[i] + float(i))*tstep]
-        if i == sz-1: break
-        while data[i] < 0:
-            i += 1
-            if i == sz-1: break
-    return tofs 
-
-'''
-def getHeaderBytesTimes(fname):
-    #seems 355 bytes in header
-    data = lecroyparser.ScopeData(fname)
-    nvals = len(data.y)
-    f = open(fname,'br')
-    f.seek(HEADLEN)
-    buf = f.read()
-    f.close()
-    nseek = int(len(buf) - 2*nvals)
-    return (nseek,nvals,data.x)
-'''
+def txt2array(fname):
+    array = np.loadtxt(fname,skiprows=5,delimiter=',',usecols=(1),dtype=np.float32) * 1e4
+    #units are 0.1mV
+    return array.astype(np.int16)
 
 def traces2list(fnames:List):
     data = []
