@@ -1,12 +1,15 @@
 #!/usr/bin/python3
 
+from typing import List
 import numpy as np
-import lecroyparser 
+#import lecroyparser 
 import h5py
 import sys
 import os
 import re
 import math
+
+from src.utils import trace2array, traces2list
 
 def zeroCrossings2energy(data,thresh,tstep = 1.,t0 = 50.):
     # from fitting Ave simulations with theta0 = memmap([ 6.39445393, -0.03775023, -0.46237318])
@@ -63,9 +66,11 @@ def zeroCrossings(data,thresh,tstep = 1.):
     return tofs 
 
 def getHeaderBytesTimes(fname):
+    #seems 355 bytes in header
     data = lecroyparser.ScopeData(fname)
     nvals = len(data.y)
     f = open(fname,'br')
+    f.seek(HEADLEN)
     buf = f.read()
     f.close()
     nseek = int(len(buf) - 2*nvals)
@@ -78,14 +83,6 @@ def loadArrayBytes_int8(fname,nseek,nvals):
     f.close()
     return np.array([np.int8(v) for v in buf],dtype=np.int8)
 
-def loadArrayBytes_int16(fname,nseek,nvals,byteorder = 'little'):
-    f = open(fname,'br')
-    f.seek(nseek)
-    data = []
-    for i in range(nvals):
-        data.append(int.from_bytes(f.read(2),byteorder=byteorder))
-    f.close()
-    return np.array(data,dtype=np.int16)
 
 def getWeinerFilter(data,FREQ,cut = 2.0,noise = 0.1):
     W = np.zeros(data.shape[0],dtype=float)
@@ -101,17 +98,16 @@ def getacFilter(data,FREQ,cut = 0.2):
     return AC
 
 
-
 def main():
     if len(sys.argv)<2:
-        print('syntax is: ./src/loadbinary.py <path/fname_front--(not numnber, not extension)> <nwaves> <roll filter vals>')
+        print('syntax is: ./src/loadbinary.py <datapath/fname_front--(not numnber, not extension)> <nwaves> <roll filter vals>')
         return
-    path = 'data_fs'
+    datapath = 'data_fs'
     fname_front = 'something'
     if (len(sys.argv)>1):
         m = re.match('(.+)/(.+)--$',sys.argv[1])
         if m:
-            path = m.group(1)
+            datapath = m.group(1)
             fname_front = m.group(2)
         else:
             print('Failed the filename match')
@@ -124,13 +120,13 @@ def main():
         nroll = int(sys.argv[3])
 
     wv = int(0)
-    fname = '%s/%s--%05i.trc'%(path,fname_front,wv)
-    hname = '%s/%s.thist'%(path,fname_front)
-    ename = '%s/%s.ehist'%(path,fname_front)
-    tofsname = '%s/%s.tofs'%(path,fname_front)
+    fname = '%s/%s--%05i.trc'%(datapath,fname_front,wv)
+    hname = '%s/%s.thist'%(respath,fname_front)
+    ename = '%s/%s.ehist'%(respath,fname_front)
+    tofsname = '%s/%s.tofs'%(respath,fname_front)
     (nseek,nvals,times) = getHeaderBytesTimes(fname)
     tstep_ns = float(int((times[1]-times[0])*1.0e13+.25))/float(1e4)
-    print(tstep_ns)
+    #print(tstep_ns)
     parseddata = np.zeros(nvals,dtype=np.float32)
 
     DATAAVG = np.zeros(nvals,dtype=float)
@@ -146,7 +142,7 @@ def main():
     w_ac_filter = np.roll(np.fft.ifft(W*AC).real,nroll)
     d_w_ac_filter = np.roll(np.fft.ifft(1j*FREQ*W*AC).real,nroll)
     headstring = 'times[ns]\tw_ac\tderiv_w_ac'
-    np.savetxt('%s.filters'%(path),np.column_stack((1e9*times,w_ac_filter,d_w_ac_filter)),header=headstring)
+    np.savetxt('%s.filters'%(respath),np.column_stack((1e9*times,w_ac_filter,d_w_ac_filter)),header=headstring)
     thresh = 200 
     if (len(sys.argv)>3):
         thresh = int(sys.argv[3])
@@ -163,7 +159,7 @@ def main():
     tbins = np.linspace(0,2**9,hout.shape[0]+1)
     ebins = np.linspace(0,256,eout.shape[0]+1)
     for wv in range(nwaves):
-        fname = '%s/%s--%05i.trc'%(path,fname_front,wv)
+        fname = '%s/%s--%05i.trc'%(datapath,fname_front,wv)
         if not os.path.exists(fname):
             continue
         #parseddata = lecroyparser.ScopeData(fname)
@@ -183,7 +179,7 @@ def main():
         ens = ens + list(e)
         shots += 1
         if wv%10 == 0:
-            oname = '%s/%s--%05i.out'%(path,fname_front,wv)
+            oname = '%s/%s--%05i.out'%(respath,fname_front,wv)
             headstring = 'tstep = %.3f [ns]\n#(data,y,dy,y*dy/float(y.shape[0]))'%tstep_ns
             np.savetxt(oname,np.column_stack((data,y,dy,y*dy/float(y.shape[0]))),fmt= '%f',header=headstring)
             hout += np.histogram(tofs,tbins)[0]
@@ -193,7 +189,7 @@ def main():
             np.savetxt(ename,np.column_stack((ebins[:-1],eout)),fmt='%.2f',header = headstring)
             tofs = []
             ens = []
-    oname = '%s/%s.logic_vector_spect.out'%(path,fname_front)
+    oname = '%s/%s.logic_vector_spect.out'%(respath,fname_front)
     headstring = 'freqstep = %.3f [ns]\n#(data,y,dy,y*dy/float(y.shape[0]))'%FREQ[1]
     np.savetxt(oname,np.column_stack((DATAAVG/shots/nvals,YAVG/shots/nvals,DYAVG/shots/nvals,SAVG/shots/nvals)),fmt='%.3f',header=headstring)
     hout += np.histogram(tofs,tbins)[0]
