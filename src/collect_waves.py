@@ -14,20 +14,23 @@ def collect_files():
     else:
         key = os.getenv('_datapath').split(os.sep)[-1]
         collection.update({key:{}})
-        for i,fname in enumerate(filenames):
+        for i,fname in enumerate(filenames[:10]):
             if i%100 == 0:
                 print('working %s'%fname)
-            #roots += [ os.path.splitext(fname)[0] ]
+            roots += [ os.path.splitext(fname)[0] ]
+            if 'data' not in collection[key].keys():
+                    collection[key].update( { 'data':[] } )
             if ext == '.txt':
-                collection[key].update({'data': utils.txts2list( [os.path.join(os.getenv('_datapath'),f) for f in filenames] ) } )
+                collection[key]['data'] += [utils.txt2array( os.path.join(os.getenv('_datapath'),fname ) ) ]    
             elif ext == '.trc':
-                collection[key].update({'data': utils.traces2list( [os.path.join(os.getenv('_datapath'),f) for f in filenames] ) } )
+                collection[key]['data'] += [utils.trace2array( os.path.join(os.getenv('_datapath'),fname) ) ] 
             else:
                 collection[key].update({'data': []  } )
                 print('unknown file extension')
         collection[key].update({'ext': ext})
-        #collection[key].update({'roots': roots})
+        collection[key].update({'roots': roots})
     return collection
+
 
 def writeH5(d):
     with h5py.File(os.path.join(os.getenv('_resultpath'),'results_collection.h5'),'a') as f:
