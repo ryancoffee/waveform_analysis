@@ -14,7 +14,7 @@ def collect_files():
     else:
         key = os.getenv('_datapath').split(os.sep)[-1]
         collection.update({key:{}})
-        for i,fname in enumerate(filenames[:10]):
+        for i,fname in enumerate(filenames):
             if i%100 == 0:
                 print('working %s'%fname)
             roots += [ os.path.splitext(fname)[0] ]
